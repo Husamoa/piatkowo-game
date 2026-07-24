@@ -1,0 +1,14 @@
+# Lokalne uruchomienie gry:
+#   docker compose up
+# potem otwórz http://localhost:8080
+#
+# To tylko serwer plików statycznych (nginx) — identyczne pliki trafiają na GitHub Pages.
+services:
+  game:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped

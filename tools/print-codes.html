@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kody QR do wydruku — Gra Piątkowska</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        margin: 0;
+        color: #16161d;
+        background: #f3f3f7;
+      }
+      header {
+        background: #17163a;
+        color: #fff;
+        padding: 18px 20px;
+      }
+      header h1 {
+        margin: 0 0 6px;
+        font-size: 18px;
+      }
+      header p {
+        margin: 0;
+        font-size: 13px;
+        color: #c9c6e6;
+      }
+      .controls {
+        padding: 16px 20px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        background: #fff;
+        border-bottom: 1px solid #ddd;
+      }
+      .controls label {
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .controls input {
+        flex: 1;
+        min-width: 260px;
+        padding: 10px 12px;
+        font-size: 14px;
+        border: 2px solid #17163a;
+        border-radius: 6px;
+      }
+      .controls button {
+        padding: 10px 18px;
+        font-size: 14px;
+        font-weight: 700;
+        background: #ffd23f;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      .hint {
+        padding: 0 20px;
+        font-size: 12px;
+        color: #555;
+      }
+      #cards {
+        padding: 20px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 18px;
+      }
+      .card {
+        background: #fff;
+        border: 2px dashed #999;
+        border-radius: 10px;
+        padding: 18px;
+        text-align: center;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .card .code-no {
+        font-size: 13px;
+        font-weight: 700;
+        color: #17163a;
+        background: #ffd23f;
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 20px;
+        margin-bottom: 10px;
+      }
+      .card .place {
+        font-size: 17px;
+        font-weight: 800;
+        margin: 6px 0;
+      }
+      .card .unlock {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 12px;
+      }
+      .card .qr {
+        display: flex;
+        justify-content: center;
+        margin: 10px 0;
+      }
+      .card .token {
+        font-family: ui-monospace, "Courier New", monospace;
+        font-size: 13px;
+        letter-spacing: 1px;
+        color: #333;
+        margin-top: 8px;
+      }
+      .card .token small {
+        display: block;
+        color: #999;
+        font-size: 10px;
+        margin-top: 2px;
+      }
+      .warn {
+        color: #b00;
+        padding: 0 20px 20px;
+        font-size: 13px;
+      }
+      @media print {
+        header,
+        .controls,
+        .hint {
+          display: none;
+        }
+        body {
+          background: #fff;
+        }
+        #cards {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .card {
+          border-color: #ccc;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Kody QR do wydruku — Gra Piątkowska</h1>
+      <p>Tylko dla organizatora. Wygeneruj kody, wydrukuj (Ctrl/Cmd+P), wytnij i naklej w miejscach.</p>
+    </header>
+
+    <div class="controls">
+      <label for="base">Adres gry:</label>
+      <input
+        id="base"
+        type="text"
+        placeholder="https://TWOJ-LOGIN.github.io/piatkowo-game/"
+      />
+      <button id="gen">Generuj kody</button>
+    </div>
+    <p class="hint">
+      Wklej adres, pod którym wystawisz grę na GitHub Pages (z ukośnikiem na końcu).
+      Każdy kod prowadzi do <code>adres/#s=TOKEN</code> i odblokowuje kolejną zagadkę
+      dopiero po zeskanowaniu we właściwej kolejności.
+    </p>
+
+    <div id="cards"></div>
+    <div id="warn" class="warn"></div>
+
+    <script src="../js/config.js"></script>
+    <script src="../lib/qrcode.min.js"></script>
+    <script>
+      var CFG = window.GAME_CONFIG;
+      var STAGES = CFG.stages;
+      var N = STAGES.length;
+      var LS_KEY = "piatkowo_print_base";
+
+      var baseInput = document.getElementById("base");
+      var cards = document.getElementById("cards");
+      var warn = document.getElementById("warn");
+
+      baseInput.value = localStorage.getItem(LS_KEY) || "";
+
+      function normBase(b) {
+        b = (b || "").trim();
+        if (!b) return "";
+        // usuń istniejący hash, zapewnij końcowy ukośnik
+        b = b.replace(/#.*$/, "");
+        if (!/\/$/.test(b)) b += "/";
+        return b;
+      }
+
+      function unlockLabel(i) {
+        if (i < N - 1) return "odblokowuje: ZAGADKA " + STAGES[i + 1].id;
+        return "odblokowuje: EKRAN ZWYCIĘSTWA";
+      }
+
+      function generate() {
+        var base = normBase(baseInput.value);
+        cards.innerHTML = "";
+        warn.textContent = "";
+        if (!base) {
+          warn.textContent = "Podaj adres gry, żeby wygenerować kody.";
+          return;
+        }
+        if (!/^https?:\/\//.test(base)) {
+          warn.textContent =
+            "Uwaga: aparat iPhone'a otworzy link tylko gdy zaczyna się od http(s)://";
+        }
+        localStorage.setItem(LS_KEY, baseInput.value.trim());
+
+        // Kod startowy — Ania skanuje go na początku, żeby otworzyć grę.
+        (function () {
+          var card = document.createElement("div");
+          card.className = "card";
+          card.style.borderColor = "#3fa34d";
+          var no = document.createElement("div");
+          no.className = "code-no";
+          no.style.background = "#3fa34d";
+          no.style.color = "#fff";
+          no.textContent = "START";
+          card.appendChild(no);
+          var place = document.createElement("div");
+          place.className = "place";
+          place.textContent = "Daj Ani na początek";
+          card.appendChild(place);
+          var unlock = document.createElement("div");
+          unlock.className = "unlock";
+          unlock.textContent = "otwiera grę (ekran tytułowy)";
+          card.appendChild(unlock);
+          var qr = document.createElement("div");
+          qr.className = "qr";
+          card.appendChild(qr);
+          new QRCode(qr, {
+            text: base,
+            width: 220,
+            height: 220,
+            correctLevel: QRCode.CorrectLevel.M,
+          });
+          var token = document.createElement("div");
+          token.className = "token";
+          token.style.fontSize = "10px";
+          token.textContent = base;
+          card.appendChild(token);
+          cards.appendChild(card);
+        })();
+
+        STAGES.forEach(function (s, i) {
+          var url = base + "#s=" + encodeURIComponent(s.token);
+
+          var card = document.createElement("div");
+          card.className = "card";
+
+          var no = document.createElement("div");
+          no.className = "code-no";
+          no.textContent = "KOD " + s.id + " z " + N;
+          card.appendChild(no);
+
+          var place = document.createElement("div");
+          place.className = "place";
+          place.textContent = s.final ? "Naklej na prezencie" : "Naklej w: " + s.place;
+          card.appendChild(place);
+
+          var unlock = document.createElement("div");
+          unlock.className = "unlock";
+          unlock.textContent = unlockLabel(i);
+          card.appendChild(unlock);
+
+          var qr = document.createElement("div");
+          qr.className = "qr";
+          card.appendChild(qr);
+          new QRCode(qr, {
+            text: url,
+            width: 220,
+            height: 220,
+            correctLevel: QRCode.CorrectLevel.M,
+          });
+
+          var token = document.createElement("div");
+          token.className = "token";
+          token.textContent = s.token;
+          var small = document.createElement("small");
+          small.textContent = "kod awaryjny (do ręcznego wpisania)";
+          token.appendChild(small);
+          card.appendChild(token);
+
+          cards.appendChild(card);
+        });
+      }
+
+      document.getElementById("gen").addEventListener("click", generate);
+      if (baseInput.value) generate();
+    </script>
+  </body>
+</html>
