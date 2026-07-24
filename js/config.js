@@ -72,7 +72,7 @@ window.GAME_CONFIG = {
       label: "ZAGADKA 5",
       icon: "cake",
       riddle:
-        "Prezent czeka gdzieś,\ngdzie możesz ciasto zjeść.\n\nDostać go możesz, jeśli\nwejdziesz i powiesz HASŁO:\n\nreklamowe firmy od cukierków,\nktórą rozlewał na przystankach\npewien pawlaczek przystojniaczek.",
+        "Prezent czeka gdzieś,\ngdzie możesz ciasto zjeść.\n\nDostać go możesz, jeśli\nwejdziesz i powiesz\nhasło reklamowe firmy od cukierków,\nktórą rozlewał na przystankach\npewien pawlaczek przystojniaczek.",
       // -> cukiernia; kod QR w cukierni odpala ekran zwycięstwa
       token: "PTK-C1F6",
       place: "Cukiernia",

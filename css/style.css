@@ -26,6 +26,20 @@
   padding: 0;
 }
 
+/* iOS ignoruje user-scalable=no — to wyłącza zoom z podwójnego tapnięcia
+   na klikalnych elementach (np. 5x tap w tytuł = panel organizatora),
+   zostawiając pinch-zoom. */
+button,
+.btn,
+.link,
+.iconbtn,
+.top-title,
+.win-title,
+.dot,
+summary {
+  touch-action: manipulation;
+}
+
 html,
 body {
   height: 100%;
@@ -486,6 +500,97 @@ body {
   80% {
     transform: translateX(5px);
   }
+}
+
+/* ---- skaner ---- */
+.scanner {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 20px;
+}
+.scanner-stage {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border: 4px solid var(--ink);
+  box-shadow: 0 0 0 4px var(--bg0);
+  background: #111;
+}
+.scanner-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.scanner-frame {
+  position: absolute;
+  inset: 12%;
+  border: 3px solid var(--accent);
+  box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+.scanner-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--red);
+  box-shadow: 0 0 8px var(--red);
+  animation: scanmove 1.8s ease-in-out infinite;
+}
+@keyframes scanmove {
+  0% {
+    top: 4%;
+  }
+  50% {
+    top: 92%;
+  }
+  100% {
+    top: 4%;
+  }
+}
+.scanner-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+.scanner-hint {
+  font-size: 10px;
+  color: var(--ink);
+  line-height: 1.7;
+}
+.scanner-err {
+  font-size: 10px;
+  color: var(--accent);
+  line-height: 1.8;
+  max-width: 320px;
+}
+
+/* ---- nawigacja między zagadkami ---- */
+.nav-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 28px;
+}
+.solved-badge {
+  font-size: 9px;
+  color: var(--green);
+  border: 2px solid var(--green);
+  padding: 6px 10px;
 }
 
 @media (prefers-reduced-motion: reduce) {

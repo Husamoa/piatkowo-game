@@ -138,12 +138,58 @@
     );
   }
 
-  function renderRiddle(stage) {
+  // Wyciąga token z odczytanego kodu QR (kod to link .../#s=TOKEN).
+  function tokenFromScanned(text) {
+    text = (text || "").trim();
+    var i = text.indexOf("#s=");
+    if (i >= 0) return decodeURIComponent(text.slice(i + 3));
+    i = text.indexOf("s=");
+    if (i >= 0 && /^https?:\/\//.test(text)) return decodeURIComponent(text.slice(i + 2));
+    return text.toUpperCase();
+  }
+
+  function renderRiddleAt(idx) {
     clearScreen();
     var progress = loadProgress();
-    var kids = [
-      topBar(),
-      progressDots(progress),
+    if (idx == null) idx = progress;
+    if (idx > progress) idx = progress;
+    if (idx < 0) idx = 0;
+    var stage = STAGES[idx];
+    var isCurrent = idx === progress;
+
+    var kids = [topBar(), progressDots(progress)];
+
+    // pasek nawigacji: wstecz do rozwiązanych / powrót do aktualnej
+    var nav = h("div", { class: "nav-row" });
+    nav.appendChild(
+      idx > 0
+        ? h("button", {
+            class: "btn btn-sm btn-ghost",
+            text: "◀ POPRZEDNIA",
+            onclick: function () {
+              Audio8.unlock();
+              Audio8.blip();
+              renderRiddleAt(idx - 1);
+            },
+          })
+        : h("span")
+    );
+    nav.appendChild(
+      !isCurrent
+        ? h("button", {
+            class: "btn btn-sm",
+            text: "AKTUALNA ▶",
+            onclick: function () {
+              Audio8.unlock();
+              Audio8.blip();
+              renderRiddleAt(progress);
+            },
+          })
+        : h("span")
+    );
+    kids.push(nav);
+
+    kids.push(
       h("div", {
         class: "stage-label",
         text: stage.label + " · ETAP " + stage.id + "/" + N,
@@ -153,8 +199,8 @@
         "div",
         { class: "dialog" },
         h("p", { class: "riddle-text" + (stage.cipher ? " mono" : ""), text: stage.riddle })
-      ),
-    ];
+      )
+    );
 
     if (stage.cipher) {
       var hintBox = h(
@@ -177,25 +223,45 @@
       kids.push(hintBtn, hintBox);
     }
 
-    kids.push(
-      h(
-        "div",
-        { class: "scan-cta" },
-        Sprites.el("qr", 6),
-        h("p", {
-          class: "scan-text",
-          text: "Znajdź to miejsce i zeskanuj tam kod QR aparatem telefonu.",
+    if (isCurrent) {
+      kids.push(
+        h(
+          "div",
+          { class: "scan-cta" },
+          Sprites.el("qr", 6),
+          h("p", {
+            class: "scan-text",
+            text: "Znajdź to miejsce i zeskanuj kod QR.",
+          })
+        ),
+        h("button", {
+          class: "btn btn-big",
+          text: "OTWÓRZ APARAT",
+          onclick: function () {
+            Audio8.unlock();
+            Audio8.blip();
+            QRScanner.open(
+              function (text) {
+                processScan(tokenFromScanned(text));
+              },
+              function () {
+                manualEntry();
+              }
+            );
+          },
+        }),
+        h("button", {
+          class: "link",
+          text: "Aparat nie działa? Wpisz kod ręcznie",
+          onclick: function () {
+            Audio8.unlock();
+            manualEntry();
+          },
         })
-      ),
-      h("button", {
-        class: "link",
-        text: "Aparat nie działa? Wpisz kod ręcznie",
-        onclick: function () {
-          Audio8.unlock();
-          manualEntry();
-        },
-      })
-    );
+      );
+    } else {
+      kids.push(h("div", { class: "solved-badge", text: "✓ ZAGADKA ROZWIĄZANA" }));
+    }
 
     screen.appendChild(h("div", { class: "view view-riddle" }, kids));
   }
@@ -442,7 +508,7 @@
   function renderCurrent() {
     var p = loadProgress();
     if (p >= N) renderVictory();
-    else renderRiddle(STAGES[p]);
+    else renderRiddleAt(p);
   }
 
   /* ---------- odczyt tokenu z URL (#s=...) ---------- */
@@ -472,6 +538,14 @@
     };
     window.addEventListener("pointerdown", unlockOnce);
 
+    // Pewne wejście do panelu organizatora: adres .../#org
+    if ((location.hash || "").replace("#", "") === "org") {
+      clearHash();
+      renderCurrent();
+      organizer();
+      return bootSW();
+    }
+
     var token = readTokenFromHash();
     if (token) {
       clearHash();
@@ -483,6 +557,10 @@
       renderCurrent();
     }
 
+    bootSW();
+  }
+
+  function bootSW() {
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", function () {
         navigator.serviceWorker.register("sw.js").catch(function () {});

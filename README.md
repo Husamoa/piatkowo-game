@@ -70,12 +70,17 @@ wpisać ręcznie w grze, gdyby aparat nie zadziałał.
 
 - Gra pokazuje kolejno zagadki. Postęp jest zapisywany w przeglądarce telefonu
   (`localStorage`).
-- Każdy kod QR to link `adres-gry/#s=TOKEN`. Aparat telefonu otwiera link, a gra
-  sprawdza, czy to **właściwy kod na tym etapie**:
+- Skanowanie kodu na dwa sposoby (oba prowadzą do tego samego):
+  - **Przycisk „OTWÓRZ APARAT" w grze** (zalecane) — skaner wbudowany, bez
+    przeładowania strony, więc działa też offline w piwnicy i na Chrome na iPhonie.
+  - **Aparat systemowy telefonu** — każdy kod to link `adres-gry/#s=TOKEN`.
+- Gra sprawdza, czy to **właściwy kod na tym etapie**:
   - dobry kod → „DOBRZE!" i następna zagadka,
   - nie ten / obcy → **„Nieprawidłowy kod QR!"**,
   - już zeskanowany → miły komunikat „już masz ten kod".
 - Kodów nie da się przeskoczyć — działają tylko po kolei.
+- **Powrót do poprzedniej zagadki:** przyciski **◀ POPRZEDNIA / AKTUALNA ▶**
+  (przeglądanie rozwiązanych zagadek nie zmienia postępu).
 - Odpowiedzi nigdy nie pojawiają się na ekranie.
 
 **Zagadka 2** (szyfr GA-DE-RY-PO-LU-KI) ma przycisk **PODPOWIEDŹ**, który
@@ -97,13 +102,12 @@ ujawnia klucz szyfru.
 
 ## 🛠️ Panel organizatora (do testów i ratunku)
 
-W trakcie gry **dotknij 5× tytuł „GRA PIĄTKOWSKA"** u góry ekranu. Otworzy się
-panel, w którym możesz:
+Dwa sposoby wejścia:
 
-- przeskoczyć do dowolnego etapu,
-- zresetować grę,
-- podejrzeć wszystkie tokeny.
+- **Dotknij 5× tytuł „GRA PIĄTKOWSKA"** u góry ekranu, lub
+- otwórz adres **`adres-gry/#org`** (pewniejsze, np. z zakładki).
 
+W panelu możesz przeskoczyć do dowolnego etapu, zresetować grę i podejrzeć tokeny.
 Przydatne, gdyby coś poszło nie tak na miejscu.
 
 ---
@@ -135,11 +139,13 @@ index.html              gra
 css/style.css           styl 8-bit + CRT
 js/config.js            zagadki + tokeny (tu edytujesz)
 js/game.js              logika i widoki
+js/scanner.js           skaner QR w grze (kamera)
 js/sprites.js           pixel-art
 js/audio.js             chiptune SFX
 sw.js                   offline
 tools/print-codes.html  generator kodów QR do druku
 lib/qrcode.min.js       generator QR (MIT, davidshimjs)
+lib/jsQR.min.js         dekoder QR z kamery (Apache-2.0)
 assets/fonts/           Press Start 2P (OFL)
 docker-compose.yml      lokalny serwer
 .github/workflows/      auto-deploy na Pages

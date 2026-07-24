@@ -9,7 +9,7 @@
  * WAŻNE: po każdej zmianie plików gry podbij numer wersji (v1 -> v2),
  * inaczej telefon będzie serwował starą wersję z cache.
  */
-var CACHE = "piatkowo-v2";
+var CACHE = "piatkowo-v3";
 var ASSETS = [
   "./",
   "./index.html",
@@ -18,11 +18,13 @@ var ASSETS = [
   "./js/config.js",
   "./js/audio.js",
   "./js/sprites.js",
+  "./js/scanner.js",
   "./js/game.js",
   "./assets/fonts/PressStart2P-Regular.ttf",
   "./assets/icon.svg",
   "./tools/print-codes.html",
   "./lib/qrcode.min.js",
+  "./lib/jsQR.min.js",
 ];
 
 self.addEventListener("install", function (e) {
