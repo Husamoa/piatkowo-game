@@ -172,7 +172,8 @@
       var cards = document.getElementById("cards");
       var warn = document.getElementById("warn");
 
-      baseInput.value = localStorage.getItem(LS_KEY) || "";
+      baseInput.value =
+        localStorage.getItem(LS_KEY) || "https://husamoa.github.io/piatkowo-game/";
 
       function normBase(b) {
         b = (b || "").trim();
