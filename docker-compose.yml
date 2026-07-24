@@ -11,4 +11,5 @@ services:
     volumes:
       - ./:/usr/share/nginx/html:ro
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    restart: unless-stopped
+    # Nie wstawaj sam po restarcie komputera — uruchamiasz ręcznie: docker compose up
+    restart: "no"
