@@ -16,7 +16,8 @@ window.QRScanner = (function () {
     overlay = null,
     onOk = null,
     onManual = null,
-    scanning = false;
+    scanning = false,
+    requestId = 0;
 
   function h(tag, attrs) {
     var e = document.createElement(tag);
@@ -41,6 +42,7 @@ window.QRScanner = (function () {
   }
 
   function stop() {
+    requestId++;
     scanning = false;
     if (raf) {
       cancelAnimationFrame(raf);
@@ -114,6 +116,7 @@ window.QRScanner = (function () {
   }
 
   function open(onResult, onManualCb) {
+    var currentRequest = ++requestId;
     onOk = onResult;
     onManual = onManualCb || null;
     canvas = document.createElement("canvas");
@@ -167,6 +170,12 @@ window.QRScanner = (function () {
     navigator.mediaDevices
       .getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false })
       .then(function (s) {
+        if (currentRequest !== requestId || !overlay || !video) {
+          s.getTracks().forEach(function (t) {
+            t.stop();
+          });
+          return;
+        }
         stream = s;
         video.srcObject = s;
         video.setAttribute("playsinline", "");
@@ -176,6 +185,7 @@ window.QRScanner = (function () {
         raf = requestAnimationFrame(tick);
       })
       .catch(function (err) {
+        if (currentRequest !== requestId) return;
         var name = err && err.name ? err.name : "";
         if (name === "NotAllowedError" || name === "SecurityError")
           showError(

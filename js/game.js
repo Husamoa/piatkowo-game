@@ -139,12 +139,21 @@
   }
 
   // Wyciąga token z odczytanego kodu QR (kod to link .../#s=TOKEN).
+  function decodeToken(text) {
+    try {
+      return decodeURIComponent(text);
+    } catch (_) {
+      return text;
+    }
+  }
+
   function tokenFromScanned(text) {
     text = (text || "").trim();
     var i = text.indexOf("#s=");
-    if (i >= 0) return decodeURIComponent(text.slice(i + 3));
+    if (i >= 0) return decodeToken(text.slice(i + 3));
     i = text.indexOf("s=");
-    if (i >= 0 && /^https?:\/\//.test(text)) return decodeURIComponent(text.slice(i + 2));
+    if (i >= 0 && /^https?:\/\//.test(text))
+      return decodeToken(text.slice(i + 2));
     return text.toUpperCase();
   }
 
@@ -515,9 +524,9 @@
   function readTokenFromHash() {
     var hsh = location.hash || "";
     if (hsh.charAt(0) === "#") hsh = hsh.slice(1);
-    if (hsh.indexOf("s=") === 0) return decodeURIComponent(hsh.slice(2));
+    if (hsh.indexOf("s=") === 0) return decodeToken(hsh.slice(2));
     var m = hsh.match(/^\/?s\/(.+)$/);
-    if (m) return decodeURIComponent(m[1]);
+    if (m) return decodeToken(m[1]);
     return null;
   }
   function clearHash() {
@@ -526,6 +535,23 @@
     } catch (e) {
       location.hash = "";
     }
+  }
+
+  function handleHash() {
+    if ((location.hash || "").replace("#", "") === "org") {
+      clearHash();
+      renderCurrent();
+      organizer();
+      return true;
+    }
+
+    var token = readTokenFromHash();
+    if (!token) return false;
+
+    clearHash();
+    renderCurrent(); // widok pod spodem (dla nakładki błędu)
+    processScan(token); // sukces podmieni ekran, błąd pokaże nakładkę
+    return true;
   }
 
   /* ---------- start ---------- */
@@ -537,24 +563,11 @@
       window.removeEventListener("pointerdown", unlockOnce);
     };
     window.addEventListener("pointerdown", unlockOnce);
+    window.addEventListener("hashchange", handleHash);
 
-    // Pewne wejście do panelu organizatora: adres .../#org
-    if ((location.hash || "").replace("#", "") === "org") {
-      clearHash();
-      renderCurrent();
-      organizer();
-      return bootSW();
-    }
-
-    var token = readTokenFromHash();
-    if (token) {
-      clearHash();
-      renderCurrent(); // widok pod spodem (dla nakładki błędu)
-      processScan(token); // sukces podmieni ekran, błąd pokaże nakładkę
-    } else if (loadProgress() === 0) {
-      renderTitle();
-    } else {
-      renderCurrent();
+    if (!handleHash()) {
+      if (loadProgress() === 0) renderTitle();
+      else renderCurrent();
     }
 
     bootSW();
