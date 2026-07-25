@@ -70,10 +70,13 @@ wpisać ręcznie w grze, gdyby aparat nie zadziałał.
 
 - Gra pokazuje kolejno zagadki. Postęp jest zapisywany w przeglądarce telefonu
   (`localStorage`).
-- Skanowanie kodu na dwa sposoby (oba prowadzą do tego samego):
-  - **Przycisk „OTWÓRZ APARAT" w grze** (zalecane) — skaner wbudowany, bez
-    przeładowania strony, więc działa też offline w piwnicy i na Chrome na iPhonie.
-  - **Aparat systemowy telefonu** — każdy kod to link `adres-gry/#s=TOKEN`.
+- **Wejście tylko „frontowymi drzwiami":** przez **kod START** albo wpisany adres
+  gry. Kto NIE wszedł wcześniej, a zeskanuje kod z trasy zwykłym aparatem, widzi
+  tylko ekran **STOP** — nie wchodzi do gry (obcy nie „wejdzie" przypadkiem).
+- **Kody zagadek zaliczasz wyłącznie skanerem w grze** — przycisk
+  **„OTWÓRZ APARAT"** (bez przeładowania strony, działa offline i na Chrome na
+  iPhonie) — albo wpisując kod ręcznie. Zeskanowanie kodu trasy zwykłym aparatem
+  NIE zalicza (pokazuje „SKANUJ W GRZE").
 - Gra sprawdza, czy to **właściwy kod na tym etapie**:
   - dobry kod → „DOBRZE!" i następna zagadka,
   - nie ten / obcy → **„Nieprawidłowy kod QR!"**,
@@ -95,6 +98,9 @@ ujawnia klucz szyfru.
   także po zeskanowaniu kodu w piwnicy.
 - **Graj w Safari**, nie trzeba dodawać do ekranu głównego (gra jest tak
   ustawiona, że nawet dodana do ekranu współdzieli zapis postępu).
+- **Ania musi zacząć od kodu START** (albo wpisać adres) — to „frontowe drzwi".
+  Po tym kody trasy skanuje przyciskiem **OTWÓRZ APARAT** w grze. Gdyby otworzyła
+  kod trasy zwykłym aparatem, zobaczy tylko STOP (to celowe zabezpieczenie).
 - **Przetestuj całość** na swoim iPhonie 13 na wersji z GitHub Pages, zanim
   wręczysz telefon Ani.
 

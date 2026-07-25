@@ -502,6 +502,22 @@ body {
   }
 }
 
+/* ---- ekran blokady ---- */
+.view-blocked {
+  margin-top: 12vh;
+}
+.blocked-title {
+  font-size: 30px;
+  color: var(--red);
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+}
+.blocked-msg {
+  font-size: 10px;
+  color: var(--dim);
+  line-height: 2;
+  max-width: 300px;
+}
+
 /* ---- skaner ---- */
 .scanner {
   position: fixed;

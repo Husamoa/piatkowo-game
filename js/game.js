@@ -23,6 +23,17 @@
     localStorage.setItem(CFG.storageKey, String(p));
   }
 
+  /* ---------- "frontowe drzwi" ---------- */
+  // Do gry można wejść tylko przez kod/adres START (goły adres, bez #s=).
+  // Kod trasy otwarty zwykłym aparatem bez wcześniejszego wejścia => blokada.
+  var ENTERED_KEY = "piatkowo_entered_v1";
+  function hasEntered() {
+    return localStorage.getItem(ENTERED_KEY) === "1";
+  }
+  function markEntered() {
+    localStorage.setItem(ENTERED_KEY, "1");
+  }
+
   /* ---------- mini helper DOM ---------- */
   function h(tag, attrs) {
     var e = document.createElement(tag);
@@ -114,6 +125,22 @@
   }
 
   /* ---------- widoki ---------- */
+  function renderBlocked() {
+    clearScreen();
+    screen.appendChild(
+      h(
+        "div",
+        { class: "view view-blocked" },
+        h("div", { class: "stage-icon" }, Sprites.el("door", 7)),
+        h("h2", { class: "blocked-title", text: "STOP" }),
+        h("p", {
+          class: "blocked-msg",
+          text: "Aby zagrać, zacznij od kodu START (albo wpisz adres gry w przeglądarce).",
+        })
+      )
+    );
+  }
+
   function renderTitle() {
     clearScreen();
     screen.appendChild(
@@ -540,6 +567,7 @@
   function handleHash() {
     if ((location.hash || "").replace("#", "") === "org") {
       clearHash();
+      markEntered();
       renderCurrent();
       organizer();
       return true;
@@ -549,8 +577,21 @@
     if (!token) return false;
 
     clearHash();
-    renderCurrent(); // widok pod spodem (dla nakładki błędu)
-    processScan(token); // sukces podmieni ekran, błąd pokaże nakładkę
+    // Wejście z linku kodu trasy (natywny aparat). Kto nie wszedł wcześniej
+    // frontowymi drzwiami (kod START / adres) — nie wchodzi do gry.
+    if (!hasEntered()) {
+      renderBlocked();
+      return true;
+    }
+    // Już wcześniej wszedł: pokazujemy grę, ale kod zalicza się TYLKO przez
+    // skaner w grze (OTWÓRZ APARAT) lub ręcznie.
+    if (loadProgress() === 0) renderTitle();
+    else renderCurrent();
+    overlay(
+      "info",
+      "SKANUJ W GRZE",
+      "Ten kod zaliczysz tylko w grze: kliknij OTWÓRZ APARAT i zeskanuj go tam."
+    );
     return true;
   }
 
@@ -566,6 +607,7 @@
     window.addEventListener("hashchange", handleHash);
 
     if (!handleHash()) {
+      markEntered(); // wejście frontowe: adres strony lub kod START
       if (loadProgress() === 0) renderTitle();
       else renderCurrent();
     }
