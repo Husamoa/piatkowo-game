@@ -40,7 +40,8 @@ GitHub Pages.
    `https://TWOJ-LOGIN.github.io/NAZWA-REPO/`.
 
 Adres gry to np. `https://TWOJ-LOGIN.github.io/piatkowo-game/`.
-Ten adres wklejasz Ani (najlepiej też jako kod QR startowy) oraz w generatorze kodów.
+Ten adres wklejasz w generatorze kodów. Ani dajesz wygenerowany **kod START**,
+który zawiera osobny token wejścia.
 
 ---
 
@@ -61,7 +62,10 @@ Ten adres wklejasz Ani (najlepiej też jako kod QR startowy) oraz w generatorze 
 | 4 | Pomnik Bolesława Chrobrego | Zagadka 5 |
 | 5 | Na prezencie (w cukierni) | 🏆 Ekran zwycięstwa |
 
-Pod każdym kodem QR jest też **kod awaryjny** (np. `PTK-7QF2`) — Ania może go
+Kod START jest jedynym wejściem do gry. Po zmianie `startToken` w
+[`js/config.js`](js/config.js) trzeba wygenerować i wydrukować go ponownie.
+
+Pod każdym kodem trasy jest też **kod awaryjny** (np. `PTK-7QF2`) — Ania może go
 wpisać ręcznie w grze, gdyby aparat nie zadziałał.
 
 ---
@@ -70,8 +74,8 @@ wpisać ręcznie w grze, gdyby aparat nie zadziałał.
 
 - Gra pokazuje kolejno zagadki. Postęp jest zapisywany w przeglądarce telefonu
   (`localStorage`).
-- **Wejście tylko „frontowymi drzwiami":** przez **kod START** albo wpisany adres
-  gry. Kto NIE wszedł wcześniej, a zeskanuje kod z trasy zwykłym aparatem, widzi
+- **Wejście tylko „frontowymi drzwiami":** przez **kod START**. Kto NIE wszedł
+  wcześniej, a zeskanuje kod z trasy zwykłym aparatem, widzi
   tylko ekran **STOP** — nie wchodzi do gry (obcy nie „wejdzie" przypadkiem).
 - **Kody zagadek zaliczasz wyłącznie skanerem w grze** — przycisk
   **„OTWÓRZ APARAT"** (bez przeładowania strony, działa offline i na Chrome na
@@ -98,7 +102,7 @@ ujawnia klucz szyfru.
   także po zeskanowaniu kodu w piwnicy.
 - **Graj w Safari**, nie trzeba dodawać do ekranu głównego (gra jest tak
   ustawiona, że nawet dodana do ekranu współdzieli zapis postępu).
-- **Ania musi zacząć od kodu START** (albo wpisać adres) — to „frontowe drzwi".
+- **Ania musi zacząć od kodu START** — to „frontowe drzwi".
   Po tym kody trasy skanuje przyciskiem **OTWÓRZ APARAT** w grze. Gdyby otworzyła
   kod trasy zwykłym aparatem, zobaczy tylko STOP (to celowe zabezpieczenie).
 - **Przetestuj całość** na swoim iPhonie 13 na wersji z GitHub Pages, zanim

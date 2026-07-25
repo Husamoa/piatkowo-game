@@ -153,8 +153,8 @@
     </div>
     <p class="hint">
       Wklej adres, pod którym wystawisz grę na GitHub Pages (z ukośnikiem na końcu).
-      Każdy kod prowadzi do <code>adres/#s=TOKEN</code> i odblokowuje kolejną zagadkę
-      dopiero po zeskanowaniu we właściwej kolejności.
+      Kody trasy prowadzą do <code>adres/#s=TOKEN</code> i odblokowują kolejne zagadki
+      dopiero po zeskanowaniu w grze, we właściwej kolejności.
     </p>
 
     <div id="cards"></div>
@@ -205,6 +205,7 @@
 
         // Kod startowy — Ania skanuje go na początku, żeby otworzyć grę.
         (function () {
+          var startUrl = base + "#start=" + encodeURIComponent(CFG.startToken);
           var card = document.createElement("div");
           card.className = "card";
           card.style.borderColor = "#3fa34d";
@@ -226,7 +227,7 @@
           qr.className = "qr";
           card.appendChild(qr);
           new QRCode(qr, {
-            text: base,
+            text: startUrl,
             width: 220,
             height: 220,
             correctLevel: QRCode.CorrectLevel.M,
@@ -234,7 +235,7 @@
           var token = document.createElement("div");
           token.className = "token";
           token.style.fontSize = "10px";
-          token.textContent = base;
+          token.textContent = startUrl;
           card.appendChild(token);
           cards.appendChild(card);
         })();

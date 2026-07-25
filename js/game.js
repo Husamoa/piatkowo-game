@@ -1,10 +1,11 @@
 /*
  * GRA PIĄTKOWSKA — logika i widoki.
  *
- * Postęp trzymany w localStorage. Kod QR to link postaci:
+ * Postęp trzymany w localStorage. Kod START to link postaci:
+ *   https://.../piatkowo-game/#start=PTK-START-XXXX
+ * Kod trasy to link postaci:
  *   https://.../piatkowo-game/#s=PTK-XXXX
- * Aparat telefonu otwiera ten link, gra odczytuje token z # i sprawdza,
- * czy to właściwy kod na tym etapie.
+ * Kody trasy zalicza wyłącznie skaner w grze lub ręczne wpisanie.
  */
 (function () {
   var CFG = window.GAME_CONFIG;
@@ -24,7 +25,7 @@
   }
 
   /* ---------- "frontowe drzwi" ---------- */
-  // Do gry można wejść tylko przez kod/adres START (goły adres, bez #s=).
+  // Do gry można wejść tylko przez kod START.
   // Kod trasy otwarty zwykłym aparatem bez wcześniejszego wejścia => blokada.
   var ENTERED_KEY = "piatkowo_entered_v1";
   function hasEntered() {
@@ -135,7 +136,7 @@
         h("h2", { class: "blocked-title", text: "STOP" }),
         h("p", {
           class: "blocked-msg",
-          text: "Aby zagrać, zacznij od kodu START (albo wpisz adres gry w przeglądarce).",
+          text: "Aby zagrać, zeskanuj kod START.",
         })
       )
     );
@@ -370,6 +371,9 @@
 
   /* ---------- nakładki ---------- */
   function overlay(kind, title, msg) {
+    var existing = app().querySelectorAll(".overlay");
+    for (var i = 0; i < existing.length; i++) existing[i].remove();
+
     var ov = h(
       "div",
       { class: "overlay overlay-" + kind },
@@ -556,6 +560,12 @@
     if (m) return decodeToken(m[1]);
     return null;
   }
+  function readStartTokenFromHash() {
+    var hsh = location.hash || "";
+    if (hsh.charAt(0) === "#") hsh = hsh.slice(1);
+    if (hsh.indexOf("start=") === 0) return decodeToken(hsh.slice(6));
+    return null;
+  }
   function clearHash() {
     try {
       history.replaceState(null, "", location.pathname + location.search);
@@ -573,18 +583,31 @@
       return true;
     }
 
+    var startToken = readStartTokenFromHash();
+    if (startToken !== null) {
+      clearHash();
+      if (startToken === CFG.startToken) {
+        markEntered();
+        if (loadProgress() === 0) renderTitle();
+        else renderCurrent();
+      } else {
+        renderBlocked();
+      }
+      return true;
+    }
+
     var token = readTokenFromHash();
     if (!token) return false;
 
-    clearHash();
     // Wejście z linku kodu trasy (natywny aparat). Kto nie wszedł wcześniej
-    // frontowymi drzwiami (kod START / adres) — nie wchodzi do gry.
+    // przez kod START — nie wchodzi do gry.
     if (!hasEntered()) {
       renderBlocked();
       return true;
     }
     // Już wcześniej wszedł: pokazujemy grę, ale kod zalicza się TYLKO przez
     // skaner w grze (OTWÓRZ APARAT) lub ręcznie.
+    clearHash();
     if (loadProgress() === 0) renderTitle();
     else renderCurrent();
     overlay(
@@ -607,8 +630,8 @@
     window.addEventListener("hashchange", handleHash);
 
     if (!handleHash()) {
-      markEntered(); // wejście frontowe: adres strony lub kod START
-      if (loadProgress() === 0) renderTitle();
+      if (!hasEntered()) renderBlocked();
+      else if (loadProgress() === 0) renderTitle();
       else renderCurrent();
     }
 

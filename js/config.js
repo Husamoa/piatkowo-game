@@ -24,6 +24,7 @@ window.GAME_CONFIG = {
   title: "GRA PIĄTKOWSKA",
   subtitle: "Imieninowa wyprawa po prezent",
   hero: "ANIA",
+  startToken: "PTK-START-A7N3",
 
   // localStorage key na postęp
   storageKey: "piatkowo_progress_v1",

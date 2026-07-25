@@ -9,7 +9,8 @@
  * WAŻNE: po każdej zmianie plików gry podbij numer wersji (v1 -> v2),
  * inaczej telefon będzie serwował starą wersję z cache.
  */
-var CACHE = "piatkowo-v8";
+var CACHE_PREFIX = "piatkowo-";
+var CACHE = CACHE_PREFIX + "v9";
 var ASSETS = [
   "./",
   "./index.html",
@@ -48,7 +49,7 @@ self.addEventListener("activate", function (e) {
         return Promise.all(
           keys
             .filter(function (k) {
-              return k !== CACHE;
+              return k.indexOf(CACHE_PREFIX) === 0 && k !== CACHE;
             })
             .map(function (k) {
               return caches.delete(k);
