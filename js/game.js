@@ -211,7 +211,7 @@
       )
     );
 
-    if (stage.cipher) {
+    if (stage.hint) {
       var hintBox = h(
         "div",
         { class: "hint hidden" },

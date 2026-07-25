@@ -53,7 +53,8 @@ window.GAME_CONFIG = {
       id: 3,
       label: "ZAGADKA 3",
       icon: "car",
-      riddle: "Zielonego elektryka\nprąd nigdy nie tyka.",
+      riddle: "Elektryka prąd nie tyka.",
+      hint: "zielonego",
       // -> Skoda Elroq; kod QR przy aucie
       token: "PTK-W8V4",
       place: "Skoda Elroq",
@@ -62,7 +63,8 @@ window.GAME_CONFIG = {
       id: 4,
       label: "ZAGADKA 4",
       icon: "crown",
-      riddle: "Dziecko mieszka sobie\nna ławeczce.",
+      riddle: "Tam gdzie dziecko mieszka.",
+      hint: "ławeczka",
       // -> Bolesław Chrobry (posąg na ławce); kod QR przy pomniku
       token: "PTK-B5R1",
       place: "Pomnik Bolesława Chrobrego",

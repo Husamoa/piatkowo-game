@@ -9,7 +9,7 @@
  * WAŻNE: po każdej zmianie plików gry podbij numer wersji (v1 -> v2),
  * inaczej telefon będzie serwował starą wersję z cache.
  */
-var CACHE = "piatkowo-v5";
+var CACHE = "piatkowo-v6";
 var ASSETS = [
   "./",
   "./index.html",
