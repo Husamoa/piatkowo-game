@@ -147,7 +147,7 @@
       <input
         id="base"
         type="text"
-        placeholder="https://husamoa.github.io/piatkowo-game/"
+        placeholder="https://husamoa.github.io/piatkowo-game/ania/"
       />
       <button id="gen">Generuj kody</button>
     </div>
@@ -166,14 +166,15 @@
       var CFG = window.GAME_CONFIG;
       var STAGES = CFG.stages;
       var N = STAGES.length;
-      var LS_KEY = "piatkowo_print_base";
+      var LS_KEY = "piatkowo_print_base_ania";
 
       var baseInput = document.getElementById("base");
       var cards = document.getElementById("cards");
       var warn = document.getElementById("warn");
 
       baseInput.value =
-        localStorage.getItem(LS_KEY) || "https://husamoa.github.io/piatkowo-game/";
+        localStorage.getItem(LS_KEY) ||
+        "https://husamoa.github.io/piatkowo-game/ania/";
 
       function normBase(b) {
         b = (b || "").trim();

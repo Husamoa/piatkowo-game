@@ -1,0 +1,19 @@
+{
+  "name": "Gra Matyldy",
+  "short_name": "Gra Matyldy",
+  "description": "Wyprawa do domku Lifepackers — zagadki dla Matyldy.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "browser",
+  "background_color": "#0b0b1a",
+  "theme_color": "#0b0b1a",
+  "lang": "pl",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,11 +1,13 @@
 /*
- * GRA PIĄTKOWSKA — logika i widoki.
+ * GRA MATYLDY — logika i widoki.
  *
- * Postęp trzymany w localStorage. Kod START to link postaci:
- *   https://.../piatkowo-game/#start=PTK-START-XXXX
- * Kod trasy to link postaci:
- *   https://.../piatkowo-game/#s=PTK-XXXX
- * Kody trasy zalicza wyłącznie skaner w grze lub ręczne wpisanie.
+ * Wersja BEZ kodów QR. Etapy zalicza się:
+ *   - wpisując odpowiedź (type "answer"),
+ *   - klikając przycisk (type "confirm"),
+ *   - rozwiązując 4 mini-zagadki na kod 0000 (type "code").
+ *
+ * Postęp trzymany w localStorage (osobny klucz od gry Ani).
+ * Wejście bez blokady — otwarcie linku od razu pokazuje grę.
  */
 (function () {
   var CFG = window.GAME_CONFIG;
@@ -24,17 +26,6 @@
     localStorage.setItem(CFG.storageKey, String(p));
   }
 
-  /* ---------- "frontowe drzwi" ---------- */
-  // Do gry można wejść tylko przez kod START.
-  // Kod trasy otwarty zwykłym aparatem bez wcześniejszego wejścia => blokada.
-  var ENTERED_KEY = "piatkowo_entered_v1";
-  function hasEntered() {
-    return localStorage.getItem(ENTERED_KEY) === "1";
-  }
-  function markEntered() {
-    localStorage.setItem(ENTERED_KEY, "1");
-  }
-
   /* ---------- mini helper DOM ---------- */
   function h(tag, attrs) {
     var e = document.createElement(tag);
@@ -48,10 +39,7 @@
         e.addEventListener(k.slice(2).toLowerCase(), val);
       else if (val != null) e.setAttribute(k, val);
     }
-    for (var i = 2; i < arguments.length; i++) {
-      var c = arguments[i];
-      appendChild(e, c);
-    }
+    for (var i = 2; i < arguments.length; i++) appendChild(e, arguments[i]);
     return e;
   }
   function appendChild(e, c) {
@@ -69,6 +57,23 @@
   }
   function app() {
     return document.getElementById("app");
+  }
+
+  /* ---------- porównywanie odpowiedzi ---------- */
+  function norm(s) {
+    return (s || "").trim().toLowerCase().replace(/\s+/g, " ");
+  }
+  function checkAnswer(stage, val) {
+    var v = norm(val);
+    if (!v) return false;
+    if (stage.answerContains && v.indexOf(norm(stage.answerContains)) >= 0)
+      return true;
+    if (stage.answer && v === norm(stage.answer)) return true;
+    return false;
+  }
+  function checkCode(sub, val) {
+    var v = norm(val);
+    return v === String(sub.a) || v === "zero";
   }
 
   /* ---------- dźwięk ---------- */
@@ -125,23 +130,19 @@
     return wrap;
   }
 
-  /* ---------- widoki ---------- */
-  function renderBlocked() {
-    clearScreen();
-    screen.appendChild(
-      h(
-        "div",
-        { class: "view view-blocked" },
-        h("div", { class: "stage-icon" }, Sprites.el("door", 7)),
-        h("h2", { class: "blocked-title", text: "STOP" }),
-        h("p", {
-          class: "blocked-msg",
-          text: "Aby zagrać, zeskanuj kod START.",
-        })
-      )
-    );
+  /* ---------- zdjęcia ---------- */
+  function imagesEl(paths) {
+    if (!paths || !paths.length) return null;
+    var wrap = h("div", { class: "photos" });
+    paths.forEach(function (src) {
+      wrap.appendChild(
+        h("img", { class: "game-photo", src: src, alt: "", loading: "lazy" })
+      );
+    });
+    return wrap;
   }
 
+  /* ---------- widoki ---------- */
   function renderTitle() {
     clearScreen();
     screen.appendChild(
@@ -166,37 +167,12 @@
     );
   }
 
-  // Wyciąga token z odczytanego kodu QR (kod to link .../#s=TOKEN).
-  function decodeToken(text) {
-    try {
-      return decodeURIComponent(text);
-    } catch (_) {
-      return text;
-    }
-  }
-
-  function tokenFromScanned(text) {
-    text = (text || "").trim();
-    var i = text.indexOf("#s=");
-    if (i >= 0) return decodeToken(text.slice(i + 3));
-    i = text.indexOf("s=");
-    if (i >= 0 && /^https?:\/\//.test(text))
-      return decodeToken(text.slice(i + 2));
-    return text.toUpperCase();
-  }
-
-  function renderRiddleAt(idx) {
-    clearScreen();
-    var progress = loadProgress();
-    if (idx == null) idx = progress;
-    if (idx > progress) idx = progress;
-    if (idx < 0) idx = 0;
+  // Nagłówek etapu: pasek, kropki, nawigacja, tytuł, ikona.
+  function stageHead(idx, progress) {
     var stage = STAGES[idx];
     var isCurrent = idx === progress;
+    var head = [topBar(), progressDots(progress)];
 
-    var kids = [topBar(), progressDots(progress)];
-
-    // pasek nawigacji: wstecz do rozwiązanych / powrót do aktualnej
     var nav = h("div", { class: "nav-row" });
     nav.appendChild(
       idx > 0
@@ -206,7 +182,7 @@
             onclick: function () {
               Audio8.unlock();
               Audio8.blip();
-              renderRiddleAt(idx - 1);
+              renderStageAt(idx - 1);
             },
           })
         : h("span")
@@ -219,91 +195,223 @@
             onclick: function () {
               Audio8.unlock();
               Audio8.blip();
-              renderRiddleAt(progress);
+              renderStageAt(progress);
             },
           })
         : h("span")
     );
-    kids.push(nav);
+    head.push(nav);
 
-    kids.push(
+    head.push(
       h("div", {
         class: "stage-label",
         text: stage.label + " · ETAP " + stage.id + "/" + N,
       }),
-      h("div", { class: "stage-icon" }, Sprites.el(stage.icon, 7)),
+      stage.title ? h("div", { class: "stage-title", text: stage.title }) : null,
+      h("div", { class: "stage-icon" }, Sprites.el(stage.icon, 7))
+    );
+    return head;
+  }
+
+  // Router: rozwiązany etap (podgląd) vs aktualny (interakcja).
+  function renderStageAt(idx) {
+    clearScreen();
+    var progress = loadProgress();
+    if (idx == null) idx = progress;
+    if (idx > progress) idx = progress;
+    if (idx < 0) idx = 0;
+    var stage = STAGES[idx];
+    var isCurrent = idx === progress;
+
+    var kids = stageHead(idx, progress);
+
+    kids.push(imagesEl(stage.images));
+    kids.push(
       h(
         "div",
         { class: "dialog" },
-        h("p", { class: "riddle-text" + (stage.cipher ? " mono" : ""), text: stage.riddle })
+        h("p", { class: "riddle-text", text: stage.riddle })
       )
     );
 
-    if (stage.hint) {
-      var hintBox = h(
-        "div",
-        { class: "hint hidden" },
-        h("p", { class: "hint-text", text: stage.hint })
-      );
-      var hintBtn = h("button", {
-        class: "btn btn-sm",
-        text: "PODPOWIEDŹ",
-        onclick: function () {
-          Audio8.unlock();
-          Audio8.blip();
-          hintBox.classList.toggle("hidden");
-          hintBtn.textContent = hintBox.classList.contains("hidden")
-            ? "PODPOWIEDŹ"
-            : "UKRYJ PODPOWIEDŹ";
-        },
-      });
-      kids.push(hintBtn, hintBox);
+    if (!isCurrent) {
+      kids.push(h("div", { class: "solved-badge", text: "✓ ZAGADKA ROZWIĄZANA" }));
+      screen.appendChild(h("div", { class: "view view-riddle" }, kids));
+      return;
     }
 
-    if (isCurrent) {
-      kids.push(
-        h(
-          "div",
-          { class: "scan-cta" },
-          Sprites.el("qr", 6),
-          h("p", {
-            class: "scan-text",
-            text: "Znajdź to miejsce i zeskanuj kod QR.",
-          })
-        ),
-        h("button", {
-          class: "btn btn-big",
-          text: "OTWÓRZ APARAT",
-          onclick: function () {
-            Audio8.unlock();
-            Audio8.blip();
-            QRScanner.open(
-              function (text) {
-                processScan(tokenFromScanned(text));
-              },
-              function () {
-                manualEntry();
-              }
-            );
-          },
-        }),
-        h("button", {
-          class: "link",
-          text: "Aparat nie działa? Wpisz kod ręcznie",
-          onclick: function () {
-            Audio8.unlock();
-            manualEntry();
-          },
-        })
-      );
-    } else {
-      kids.push(h("div", { class: "solved-badge", text: "✓ ZAGADKA ROZWIĄZANA" }));
-    }
+    // aktualny etap — interakcja zależna od typu
+    if (stage.type === "answer") kids.push(answerForm(stage, idx));
+    else if (stage.type === "confirm") kids.push(confirmBtn(stage, idx));
+    else if (stage.type === "code") kids.push(codeIntroBtn(stage));
 
     screen.appendChild(h("div", { class: "view view-riddle" }, kids));
   }
 
-  function renderSuccess(isFinal) {
+  /* ---------- typ: answer (wpisanie odpowiedzi) ---------- */
+  function answerForm(stage, idx) {
+    var input = h("input", {
+      class: "code-input",
+      type: "text",
+      placeholder: stage.placeholder || "wpisz odpowiedź",
+      autocapitalize: "characters",
+      autocomplete: "off",
+      autocorrect: "off",
+      spellcheck: "false",
+    });
+    function submit() {
+      Audio8.unlock();
+      if (checkAnswer(stage, input.value)) {
+        saveProgress(idx + 1);
+        renderSuccess(stage, idx + 1 >= N);
+      } else {
+        Audio8.error();
+        overlay("error", "JESZCZE NIE TO", "Spróbuj jeszcze raz.");
+      }
+    }
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") submit();
+    });
+    return h(
+      "div",
+      { class: "answer-box" },
+      stage.prompt ? h("p", { class: "answer-prompt", text: stage.prompt }) : null,
+      input,
+      h("button", { class: "btn btn-big", text: "SPRAWDŹ", onclick: submit })
+    );
+  }
+
+  /* ---------- typ: confirm (przycisk) ---------- */
+  function confirmBtn(stage, idx) {
+    return h("button", {
+      class: "btn btn-big",
+      text: stage.confirmLabel || "DALEJ ▶",
+      onclick: function () {
+        Audio8.unlock();
+        Audio8.blip();
+        saveProgress(idx + 1);
+        renderSuccess(stage, idx + 1 >= N);
+      },
+    });
+  }
+
+  /* ---------- typ: code (4 zagadki -> 0000) ---------- */
+  function codeIntroBtn(stage) {
+    return h("button", {
+      class: "btn btn-big",
+      text: "ROZWIĄŻ KOD ▶",
+      onclick: function () {
+        Audio8.unlock();
+        Audio8.blip();
+        renderCodeStep(stage, 0);
+      },
+    });
+  }
+
+  function renderCodeStep(stage, sub) {
+    clearScreen();
+    var subs = stage.subRiddles;
+    var item = subs[sub];
+    var input = h("input", {
+      class: "code-input code-digit",
+      type: "text",
+      inputmode: "numeric",
+      maxlength: "2",
+      placeholder: "?",
+      autocomplete: "off",
+      autocorrect: "off",
+      spellcheck: "false",
+    });
+    function submit() {
+      Audio8.unlock();
+      if (checkCode(item, input.value)) {
+        if (sub + 1 < subs.length) {
+          Audio8.success();
+          renderCodeStep(stage, sub + 1);
+        } else {
+          Audio8.success();
+          renderCodeFinal(stage);
+        }
+      } else {
+        Audio8.error();
+        overlay("error", "TO NIE TA CYFRA", "Rozwiąż zagadkę i spróbuj znów.");
+      }
+    }
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") submit();
+    });
+
+    // podgląd budowanego kodu
+    var built = h("div", { class: "code-built" });
+    for (var i = 0; i < subs.length; i++) {
+      built.appendChild(
+        h("span", {
+          class: "code-slot" + (i < sub ? " filled" : ""),
+          text: i < sub ? "0" : "•",
+        })
+      );
+    }
+
+    screen.appendChild(
+      h(
+        "div",
+        { class: "view view-riddle" },
+        topBar(),
+        h("div", { class: "stage-label", text: "KOD DO SKRZYNKI" }),
+        h("div", {
+          class: "stage-title",
+          text: "CYFRA " + (sub + 1) + " Z " + subs.length,
+        }),
+        built,
+        h(
+          "div",
+          { class: "dialog" },
+          h("p", { class: "riddle-text", text: item.q })
+        ),
+        h(
+          "div",
+          { class: "answer-box" },
+          input,
+          h("button", { class: "btn btn-big", text: "SPRAWDŹ", onclick: submit })
+        )
+      )
+    );
+    setTimeout(function () {
+      input.focus();
+    }, 60);
+  }
+
+  function renderCodeFinal(stage) {
+    clearScreen();
+    screen.appendChild(
+      h(
+        "div",
+        { class: "view view-riddle" },
+        topBar(),
+        h("div", { class: "stage-title", text: "KOD DO SKRZYNKI" }),
+        imagesEl(stage.finalImage ? [stage.finalImage] : null),
+        h("p", { class: "ok-sub", text: "Masz wszystkie cyfry! Kod to:" }),
+        h("div", { class: "code-reveal", text: stage.codeReveal || "0 0 0 0" }),
+        h("p", {
+          class: "scan-text",
+          text: "Wpisz kod w skrzynce, wyjmij klucze i otwórz domek!",
+        }),
+        h("button", {
+          class: "btn btn-big blink",
+          text: stage.finalButton || "GOTOWE ▶",
+          onclick: function () {
+            Audio8.unlock();
+            saveProgress(N);
+            Audio8.victory();
+            renderVictory();
+          },
+        })
+      )
+    );
+  }
+
+  /* ---------- sukces etapu ---------- */
+  function renderSuccess(stage, isFinal) {
     clearScreen();
     screen.appendChild(
       h(
@@ -313,11 +421,12 @@
         h("h2", { class: "big-ok", text: "DOBRZE!" }),
         h("p", {
           class: "ok-sub",
-          text: isFinal ? "To był ostatni kod!" : "Kod poprawny. Ruszaj dalej!",
+          text: (stage && stage.successText) || "Świetnie! Ruszaj dalej!",
         }),
+        stage && stage.successImage ? imagesEl([stage.successImage]) : null,
         h("button", {
           class: "btn btn-big",
-          text: isFinal ? "ZOBACZ NAGRODĘ ▶" : "DALEJ ▶",
+          text: isFinal ? "ZOBACZ DOMEK ▶" : "DALEJ ▶",
           onclick: function () {
             Audio8.unlock();
             if (isFinal) {
@@ -331,11 +440,12 @@
         })
       )
     );
-    if (!isFinal) Audio8.success(); // spróbuj od razu (może być zablokowane bez gestu)
+    if (!isFinal) Audio8.success();
   }
 
   function renderVictory() {
     clearScreen();
+    var V = CFG.victory || {};
     var confetti = h("div", { class: "confetti" });
     var colors = ["#e43b44", "#ffd23f", "#4a7fe0", "#3fa34d", "#c25bd6", "#59d5e0"];
     for (var i = 0; i < 28; i++) {
@@ -350,13 +460,14 @@
         "div",
         { class: "view view-victory" },
         confetti,
-        h("h2", { class: "win-title", text: "GRATULACJE", onclick: onTitleTap }),
-        h("h1", { class: "win-name", text: CFG.hero + "!" }),
-        h("div", { class: "win-gift float" }, Sprites.el("gift", 10)),
-        h("p", {
-          class: "win-msg",
-          text: "Znalazłaś prezent!\nWszystkiego najlepszego\nw dniu imienin!",
+        h("h2", {
+          class: "win-title",
+          text: V.title || "GRATULACJE",
+          onclick: onTitleTap,
         }),
+        h("h1", { class: "win-name", text: V.name || CFG.hero + "!" }),
+        h("div", { class: "win-gift float" }, Sprites.el("gift", 10)),
+        h("p", { class: "win-msg", text: V.msg || "Udało się!" }),
         h(
           "div",
           { class: "win-hearts" },
@@ -379,7 +490,7 @@
       { class: "overlay overlay-" + kind },
       h(
         "div",
-        { class: "overlay-box shake-" + (kind === "error" ? "on" : "off") },
+        { class: "overlay-box" },
         h("h3", { class: "overlay-title", text: title }),
         msg ? h("p", { class: "overlay-msg", text: msg }) : null,
         h("button", {
@@ -397,53 +508,7 @@
     return ov;
   }
 
-  function manualEntry() {
-    var input = h("input", {
-      class: "code-input",
-      type: "text",
-      placeholder: "np. PTK-XXXX",
-      autocapitalize: "characters",
-      autocomplete: "off",
-      autocorrect: "off",
-      spellcheck: "false",
-    });
-    var ov = h(
-      "div",
-      { class: "overlay overlay-info" },
-      h(
-        "div",
-        { class: "overlay-box" },
-        h("h3", { class: "overlay-title", text: "WPISZ KOD" }),
-        h("p", { class: "overlay-msg", text: "Przepisz kod spod kodu QR." }),
-        input,
-        h(
-          "div",
-          { class: "row" },
-          h("button", {
-            class: "btn",
-            text: "ZATWIERDŹ",
-            onclick: function () {
-              var val = (input.value || "").trim().toUpperCase();
-              ov.remove();
-              if (val) processScan(val);
-            },
-          }),
-          h("button", {
-            class: "btn btn-ghost",
-            text: "ANULUJ",
-            onclick: function () {
-              ov.remove();
-            },
-          })
-        )
-      )
-    );
-    app().appendChild(ov);
-    setTimeout(function () {
-      input.focus();
-    }, 60);
-  }
-
+  /* ---------- panel organizatora ---------- */
   function organizer() {
     var progress = loadProgress();
     var jumps = h("div", { class: "org-jumps" });
@@ -477,11 +542,20 @@
     var tokens = h(
       "details",
       { class: "org-tokens" },
-      h("summary", { text: "Pokaż kody (tokeny)" })
+      h("summary", { text: "Pokaż odpowiedzi" })
     );
     STAGES.forEach(function (s) {
+      var ans =
+        s.type === "answer"
+          ? s.answer
+          : s.type === "confirm"
+          ? "(przycisk) " + (s.confirmLabel || "")
+          : "kod " + (s.codeReveal || "0 0 0 0").replace(/\s+/g, "");
       tokens.appendChild(
-        h("div", { class: "tok", text: s.id + ". " + s.place + " → " + s.token })
+        h("div", {
+          class: "tok",
+          text: s.id + ". " + (s.title || s.label) + " → " + ans,
+        })
       );
     });
 
@@ -516,106 +590,25 @@
     app().appendChild(ov);
   }
 
-  /* ---------- mechanika skanowania ---------- */
-  function processScan(token) {
-    var progress = loadProgress();
-    var j = -1;
-    for (var i = 0; i < N; i++) {
-      if (STAGES[i].token === token) {
-        j = i;
-        break;
-      }
-    }
-    if (j === -1) {
-      Audio8.error();
-      overlay("error", "NIEPRAWIDŁOWY KOD QR!", "To nie jest kod z tej gry.");
-      return;
-    }
-    if (j === progress) {
-      var newP = progress + 1;
-      saveProgress(newP);
-      renderSuccess(newP >= N);
-      return;
-    }
-    if (j < progress) {
-      overlay("info", "JUŻ ZESKANOWANY", "Ten kod już masz. Idź do kolejnej zagadki!");
-      return;
-    }
-    Audio8.error();
-    overlay("error", "NIEPRAWIDŁOWY KOD QR!", "Najpierw rozwiąż wcześniejsze zagadki.");
-  }
-
   function renderCurrent() {
     var p = loadProgress();
     if (p >= N) renderVictory();
-    else renderRiddleAt(p);
+    else renderStageAt(p);
   }
 
-  /* ---------- odczyt tokenu z URL (#s=...) ---------- */
-  function readTokenFromHash() {
-    var hsh = location.hash || "";
-    if (hsh.charAt(0) === "#") hsh = hsh.slice(1);
-    if (hsh.indexOf("s=") === 0) return decodeToken(hsh.slice(2));
-    var m = hsh.match(/^\/?s\/(.+)$/);
-    if (m) return decodeToken(m[1]);
-    return null;
-  }
-  function readStartTokenFromHash() {
-    var hsh = location.hash || "";
-    if (hsh.charAt(0) === "#") hsh = hsh.slice(1);
-    if (hsh.indexOf("start=") === 0) return decodeToken(hsh.slice(6));
-    return null;
-  }
-  function clearHash() {
-    try {
-      history.replaceState(null, "", location.pathname + location.search);
-    } catch (e) {
-      location.hash = "";
-    }
-  }
-
+  /* ---------- #org w adresie ---------- */
   function handleHash() {
     if ((location.hash || "").replace("#", "") === "org") {
-      clearHash();
-      markEntered();
+      try {
+        history.replaceState(null, "", location.pathname + location.search);
+      } catch (e) {
+        location.hash = "";
+      }
       renderCurrent();
       organizer();
       return true;
     }
-
-    var startToken = readStartTokenFromHash();
-    if (startToken !== null) {
-      clearHash();
-      if (startToken === CFG.startToken) {
-        markEntered();
-        if (loadProgress() === 0) renderTitle();
-        else renderCurrent();
-      } else {
-        renderBlocked();
-      }
-      return true;
-    }
-
-    var token = readTokenFromHash();
-    if (!token) return false;
-
-    // Wejście z linku kodu trasy (natywny aparat). Kto nie wszedł wcześniej
-    // przez kod START — nie wchodzi do gry.
-    if (!hasEntered()) {
-      renderBlocked();
-      return true;
-    }
-    // Już wcześniej wszedł: pokazujemy grę, ale kod zalicza się TYLKO przez
-    // skaner w grze (OTWÓRZ APARAT) lub ręcznie.
-    clearHash();
-    if (loadProgress() === 0) renderTitle();
-    else renderCurrent();
-    overlay(
-      "info",
-      "SKANUJ W GRZE",
-      "Ten kod zaliczysz tylko w grze: kliknij OTWÓRZ APARAT i zeskanuj go tam."
-    );
-    return true;
+    return false;
   }
 
   /* ---------- start ---------- */
@@ -630,8 +623,7 @@
     window.addEventListener("hashchange", handleHash);
 
     if (!handleHash()) {
-      if (!hasEntered()) renderBlocked();
-      else if (loadProgress() === 0) renderTitle();
+      if (loadProgress() === 0) renderTitle();
       else renderCurrent();
     }
 

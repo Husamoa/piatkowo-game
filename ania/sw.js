@@ -9,7 +9,7 @@
  * WAŻNE: po każdej zmianie plików gry podbij numer wersji (v1 -> v2),
  * inaczej telefon będzie serwował starą wersję z cache.
  */
-var CACHE_PREFIX = "piatkowo-";
+var CACHE_PREFIX = "ania-";
 var CACHE = CACHE_PREFIX + "v9";
 var ASSETS = [
   "./",

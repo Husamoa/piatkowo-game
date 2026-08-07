@@ -4,39 +4,207 @@
     <meta charset="utf-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>Gra Piątkowska</title>
+    <meta name="robots" content="noindex, nofollow" />
     <meta name="theme-color" content="#0b0b1a" />
-    <meta name="description" content="Imieninowa wyprawa po prezent — gra terenowa z kodami QR." />
-    <!-- Świadomie BEZ *-web-app-capable: dzięki temu, gdyby ktoś dodał grę do
-         ekranu głównego, nadal działa jak karta Safari i współdzieli zapis
-         postępu (localStorage) ze skanami z natywnego aparatu. -->
-    <meta name="apple-mobile-web-app-title" content="Gra Piątkowska" />
-    <link rel="manifest" href="manifest.webmanifest" />
+    <title>Kto gra?</title>
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%230b0b1a'/%3E%3Crect x='2' y='6' width='12' height='8' fill='%23e43b44'/%3E%3Crect x='7' y='2' width='2' height='12' fill='%23ffd23f'/%3E%3Crect x='2' y='9' width='12' height='2' fill='%23ffd23f'/%3E%3C/svg%3E"
     />
-    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      @font-face {
+        font-family: "PressStart";
+        src: url("ania/assets/fonts/PressStart2P-Regular.ttf") format("truetype");
+        font-display: swap;
+      }
+      :root {
+        --bg0: #0b0b1a;
+        --ink: #f4f4f8;
+        --accent: #ffd23f;
+        --accent2: #59d5e0;
+        --red: #e43b44;
+        --shadow: #000;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        font-family: "PressStart", "Courier New", monospace;
+        color: var(--ink);
+        background: var(--bg0);
+        background-image: radial-gradient(circle at 50% 0%, #241f4a 0%, #0b0b1a 70%);
+        image-rendering: pixelated;
+        -webkit-font-smoothing: none;
+        letter-spacing: 0.5px;
+        line-height: 1.7;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        text-align: center;
+        padding: 28px 20px;
+      }
+      #scanlines {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 90;
+        background: repeating-linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0.16) 0 1px,
+          transparent 1px 3px
+        );
+        opacity: 0.5;
+      }
+      h1 {
+        font-size: clamp(14px, 5.5vw, 22px);
+        color: var(--accent);
+        line-height: 1.5;
+        text-shadow: 3px 3px 0 var(--red), 6px 6px 0 rgba(0, 0, 0, 0.5);
+      }
+      .sprite {
+        image-rendering: pixelated;
+        filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.55));
+      }
+      .float {
+        animation: float 2.2s ease-in-out infinite;
+      }
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-8px);
+        }
+      }
+      .btns {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        width: 100%;
+        max-width: 320px;
+      }
+      .pick {
+        font-family: inherit;
+        font-size: 16px;
+        color: #20143a;
+        background: var(--accent);
+        border: none;
+        padding: 16px 18px;
+        cursor: pointer;
+        box-shadow: 6px 6px 0 var(--shadow);
+        transition: transform 0.03s, box-shadow 0.03s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        text-decoration: none;
+      }
+      .pick:active {
+        transform: translate(6px, 6px);
+        box-shadow: 0 0 0 var(--shadow);
+      }
+      .pick.matylda {
+        background: var(--accent2);
+      }
+      .pick .mini {
+        width: 33px;
+        height: 45px;
+      }
+    </style>
   </head>
   <body>
-    <div id="app">
-      <div id="scanlines"></div>
-      <main id="screen"></main>
+    <div id="scanlines"></div>
+
+    <canvas id="av" class="sprite float" aria-hidden="true"></canvas>
+    <h1>KTO CHCE ZAGRAĆ?</h1>
+
+    <div class="btns">
+      <!-- Ania wchodzi „frontowymi drzwiami" — link z kodem START (inaczej STOP).
+           UWAGA: token musi się zgadzać z startToken w ania/js/config.js. -->
+      <a class="pick ania" href="./ania/#start=PTK-START-A7N3">
+        <canvas class="mini" data-av aria-hidden="true"></canvas>ANIA
+      </a>
+      <a class="pick matylda" href="./matylda/">
+        <canvas class="mini" data-av aria-hidden="true"></canvas>MATYLDA
+      </a>
     </div>
 
-    <noscript>
-      <p style="color: #fff; padding: 20px; font-family: monospace">
-        Ta gra wymaga włączonego JavaScriptu.
-      </p>
-    </noscript>
+    <script>
+      // Avatar (ten sam sprite co w grze) rysowany inline, żeby root był
+      // samowystarczalny.
+      var PAL = {
+        ".": null,
+        K: "#0d0f16",
+        S: "#f6c99a",
+        N: "#f0cb5e",
+        M: "#c25bd6",
+        P: "#ff9ec7",
+      };
+      var HERO = [
+        "...NNNNN...",
+        "..NNNNNNN..",
+        ".NNNNNNNNN.",
+        ".NNSSSSSNN.",
+        ".NSSSSSSSN.",
+        ".NSKSSSKSN.",
+        ".NSSSSSSSN.",
+        ".NSSSPSSSN.",
+        "..SSSSSSS..",
+        "..MMMMMMM..",
+        ".MMMMMMMMM.",
+        "SMMMMMMMMMS",
+        ".MMMMMMMMM.",
+        ".MMMMMMMMM.",
+        "..KK...KK..",
+      ];
+      function drawHero(cv, scale) {
+        var h = HERO.length,
+          w = 0,
+          i;
+        for (i = 0; i < h; i++) w = Math.max(w, HERO[i].length);
+        cv.width = w * scale;
+        cv.height = h * scale;
+        var cx = cv.getContext("2d");
+        cx.imageSmoothingEnabled = false;
+        for (var y = 0; y < h; y++) {
+          var row = HERO[y];
+          for (var x = 0; x < row.length; x++) {
+            var col = PAL[row[x]];
+            if (!col) continue;
+            cx.fillStyle = col;
+            cx.fillRect(x * scale, y * scale, scale, scale);
+          }
+        }
+      }
+      drawHero(document.getElementById("av"), 9);
+      [].forEach.call(document.querySelectorAll("[data-av]"), function (cv) {
+        drawHero(cv, 3);
+      });
 
-    <script src="js/config.js"></script>
-    <script src="js/audio.js"></script>
-    <script src="js/sprites.js"></script>
-    <script src="lib/jsQR.min.js"></script>
-    <script src="js/scanner.js"></script>
-    <script src="js/game.js"></script>
+      // Sprzątanie po starym deployu: wyrejestruj service worker roota (dawna gra
+      // pod adresem głównym). NIE ruszamy SW z /ania/ ani /matylda/.
+      if ("serviceWorker" in navigator && navigator.serviceWorker.getRegistrations) {
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+          regs.forEach(function (reg) {
+            var scope = reg.scope || "";
+            if (scope.indexOf("/ania/") === -1 && scope.indexOf("/matylda/") === -1) {
+              reg.unregister();
+            }
+          });
+        }).catch(function () {});
+      }
+    </script>
   </body>
 </html>

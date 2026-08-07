@@ -27,7 +27,7 @@ window.GAME_CONFIG = {
   startToken: "PTK-START-A7N3",
 
   // localStorage key na postęp
-  storageKey: "piatkowo_progress_v1",
+  storageKey: "ania_progress_v1",
 
   stages: [
     {

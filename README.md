@@ -1,11 +1,17 @@
-# 🎮 Gra Piątkowska
+# 🎮 Gry terenowe (8-bit)
 
-Terenowa gra-podchody z kodami QR w klimacie 8-bit. Ania rozwiązuje kolejne
-zagadki, dochodzi do miejsca, skanuje aparatem telefonu naklejony tam kod QR i
-odblokowuje następną zagadkę — aż do prezentu.
+Repozytorium zawiera **dwie osobne gry-podchody** w klimacie 8-bit oraz wspólny
+**ekran wyboru** gracza. Czysty HTML/CSS/JS, bez build-stepu. Działa **offline**
+(service worker), na **GitHub Pages** i lokalnie przez **Docker**.
 
-Czysty HTML/CSS/JS, bez build-stepu. Działa **offline** (service worker) i
-uruchamia się na **GitHub Pages** oraz lokalnie przez **Docker**.
+| Ścieżka | Gra | Dla kogo | Mechanika |
+|---------|-----|----------|-----------|
+| `/` | Ekran wyboru | — | Dwa przyciski: ANIA / MATYLDA |
+| `/ania/` | Gra Piątkowska | Ania | Podchody z **kodami QR** (skaner w grze) |
+| `/matylda/` | Gra Matyldy | Matylda | Zagadki **bez QR** (wpisywanie odpowiedzi) |
+
+Adresy na GitHub Pages:
+`…/piatkowo-game/`, `…/piatkowo-game/ania/`, `…/piatkowo-game/matylda/`.
 
 ---
 
@@ -15,148 +21,157 @@ uruchamia się na **GitHub Pages** oraz lokalnie przez **Docker**.
 docker compose up
 ```
 
-Otwórz **http://localhost:8080**. To ten sam zestaw plików, który trafia na
-GitHub Pages.
+Potem otwórz:
 
-> Na komputerze (localhost) wszystko działa. Kamerę telefonu (skanowanie
-> natywnym aparatem) testuj na wersji z **GitHub Pages** — patrz niżej. Wejście
-> na komputer z telefonu po adresie LAN (http) nie zadziała tak samo jak https.
+- **http://localhost:8080/** — ekran wyboru
+- **http://localhost:8080/ania/** — gra Ani
+- **http://localhost:8080/matylda/** — gra Matyldy
 
----
-
-## 🌍 Wystawienie na GitHub Pages
-
-**Sposób 1 — GitHub Actions (zalecany, auto-deploy):**
-
-1. Wrzuć repo na GitHuba (`git push`).
-2. W repo: **Settings → Pages → Source: „GitHub Actions"**.
-3. Gotowe — workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
-   deployuje przy każdym pushu na `main`.
-
-**Sposób 2 — z gałęzi (bez workflow):**
-
-1. **Settings → Pages → Source: „Deploy from a branch"**, gałąź `main`, katalog `/ (root)`.
-2. Poczekaj chwilę — strona pojawi się pod adresem
-   `https://TWOJ-LOGIN.github.io/NAZWA-REPO/`.
-
-Adres gry to np. `https://TWOJ-LOGIN.github.io/piatkowo-game/`.
-Ten adres wklejasz w generatorze kodów. Ani dajesz wygenerowany **kod START**,
-który zawiera osobny token wejścia.
+> To ten sam zestaw plików, który trafia na GitHub Pages. Kamerę telefonu
+> (skaner QR w grze Ani) testuj na wersji z **GitHub Pages** (https) — po adresie
+> LAN (http) aparat nie ruszy.
 
 ---
 
-## 🖨️ Wygenerowanie i wydruk kodów QR
+## 🧭 Ekran wyboru (root)
 
-1. Otwórz [`tools/print-codes.html`](tools/print-codes.html) (lokalnie w
-   przeglądarce lub pod `http://localhost:8080/tools/print-codes.html`).
-2. Wklej **adres gry** (ten z GitHub Pages, z ukośnikiem na końcu).
+Na `/` są dwa przyciski z avatarem:
+
+- **ANIA** → otwiera `/ania/` od razu z **kodem START** wbitym w link
+  (`/ania/#start=…`), więc nie trzeba skanować kodu START.
+- **MATYLDA** → otwiera `/matylda/` (gra Matyldy nie ma żadnej blokady).
+
+> ⚠️ Token startowy Ani jest wpisany na sztywno w [`index.html`](index.html).
+> Po zmianie `startToken` w [`ania/js/config.js`](ania/js/config.js) popraw też
+> link w `index.html`.
+
+---
+
+## 🅰️ Gra Ani — `/ania/` (z kodami QR)
+
+Ania rozwiązuje zagadki, dochodzi do miejsca, **skanuje aparatem w grze** kod QR
+i odblokowuje kolejną zagadkę — aż do prezentu.
+
+### Wejście „frontowymi drzwiami"
+
+Do gry Ani wchodzi się **tylko** przez **kod START** (albo przycisk ANIA na
+ekranie wyboru — on ma ten kod w linku). Kto NIE wszedł wcześniej, a zeskanuje
+kod z trasy zwykłym aparatem, widzi tylko ekran **STOP** — obcy nie „wejdzie"
+przypadkiem. **Ta blokada nadal działa.**
+
+- Kody zagadek zaliczasz **wyłącznie skanerem w grze** (przycisk **OTWÓRZ
+  APARAT**) albo wpisując kod ręcznie.
+- Zeskanowanie kodu trasy zwykłym aparatem nie zalicza (pokazuje „SKANUJ W GRZE").
+- Kodów nie da się przeskoczyć — działają tylko po kolei.
+
+### Wygenerowanie i wydruk kodów QR
+
+1. Otwórz [`ania/tools/print-codes.html`](ania/tools/print-codes.html)
+   (lokalnie lub `http://localhost:8080/ania/tools/print-codes.html`).
+2. Adres gry jest domyślnie ustawiony na `…/piatkowo-game/ania/` — sprawdź, czy
+   się zgadza z Twoim adresem Pages.
 3. Kliknij **Generuj kody** → **Ctrl/Cmd+P** → wydrukuj.
-4. Wytnij i rozmieść kody:
+
+> Po przeniesieniu gry do `/ania/` **linki w kodach QR zawierają teraz `/ania/`** —
+> jeśli masz stare wydruki (bez `/ania/`), **wygeneruj i wydrukuj je ponownie**.
 
 | Kod | Gdzie | Do czego |
 |-----|-------|----------|
-| **START** | dajesz Ani na początek | otwiera grę (zamiast wysyłania linku) |
+| **START** | dajesz Ani na początek | otwiera grę |
 | 1 | Piwnica | Zagadka 2 |
 | 2 | Tablica ogłoszeń | Zagadka 3 |
 | 3 | Skoda Elroq | Zagadka 4 |
 | 4 | Pomnik Bolesława Chrobrego | Zagadka 5 |
 | 5 | Na prezencie (w cukierni) | 🏆 Ekran zwycięstwa |
 
-Kod START jest jedynym wejściem do gry. Po zmianie `startToken` w
-[`js/config.js`](js/config.js) trzeba wygenerować i wydrukować go ponownie.
+### Odpowiedzi Ani (spoiler)
 
-Pod każdym kodem trasy jest też **kod awaryjny** (np. `PTK-7QF2`) — Ania może go
-wpisać ręcznie w grze, gdyby aparat nie zadziałał.
+1. Piwnica
+2. Tablica ogłoszeń (szyfr GA-DE-RY-PO-LU-KI: `tgbukcg paupszdn`)
+3. Skoda Elroq
+4. Bolesław Chrobry (posąg na ławeczce)
+5. Cukiernia — hasło: **„Małe fusy"**
+
+Treści i tokeny: [`ania/js/config.js`](ania/js/config.js).
 
 ---
 
-## 🕹️ Jak to działa
+## Ⓜ️ Gra Matyldy — `/matylda/` (bez QR)
 
-- Gra pokazuje kolejno zagadki. Postęp jest zapisywany w przeglądarce telefonu
-  (`localStorage`).
-- **Wejście tylko „frontowymi drzwiami":** przez **kod START**. Kto NIE wszedł
-  wcześniej, a zeskanuje kod z trasy zwykłym aparatem, widzi
-  tylko ekran **STOP** — nie wchodzi do gry (obcy nie „wejdzie" przypadkiem).
-- **Kody zagadek zaliczasz wyłącznie skanerem w grze** — przycisk
-  **„OTWÓRZ APARAT"** (bez przeładowania strony, działa offline i na Chrome na
-  iPhonie) — albo wpisując kod ręcznie. Zeskanowanie kodu trasy zwykłym aparatem
-  NIE zalicza (pokazuje „SKANUJ W GRZE").
-- Gra sprawdza, czy to **właściwy kod na tym etapie**:
-  - dobry kod → „DOBRZE!" i następna zagadka,
-  - nie ten / obcy → **„Nieprawidłowy kod QR!"**,
-  - już zeskanowany → miły komunikat „już masz ten kod".
-- Kodów nie da się przeskoczyć — działają tylko po kolei.
-- **Powrót do poprzedniej zagadki:** przyciski **◀ POPRZEDNIA / AKTUALNA ▶**
-  (przeglądanie rozwiązanych zagadek nie zmienia postępu).
-- Odpowiedzi nigdy nie pojawiają się na ekranie.
+Zagadki jak dojechać do **domku Lifepackers** i wejść do środka. **Bez blokady i
+bez kodów QR** — otwarcie linku od razu pokazuje grę, a etapy zalicza się
+wpisując odpowiedź albo klikając przycisk.
 
-**Zagadka 2** (szyfr GA-DE-RY-PO-LU-KI) ma przycisk **PODPOWIEDŹ**, który
-ujawnia klucz szyfru.
+### Etapy
+
+1. **Dojazd do bramy** — mapka (GPS oszukuje!). Matylda wpisuje, co jest na
+   tabliczce przy bramie → **DOMEK LIFEPACKERS**.
+2. **Klucz w kamyku** — 3 zdjęcia. Klucz jest w sztucznym kamyku pod drewnianą
+   osłoną; po otwarciu bramy klika **„Otworzyłam bramę"**.
+3. **Kod do skrzynki** — 4 mini-zagadki, każda na cyfrę **0** → kod **0000** do
+   skrzynki z kluczami → przycisk **„Weszłam do domku"** → ekran gratulacji.
+
+Odpowiedzi do kodu (wszystkie = `0`):
+1. cyfra mylona z literką O,
+2. brak przy odliczaniu „3, 2, 1, START!",
+3. `21 + 10 − 11 − 10 − 10 = 0`,
+4. **zer**ówka (klasa przed pierwszą).
+
+### Zdjęcia
+
+Pliki w [`matylda/assets/photos/`](matylda/assets/photos/):
+`01-mapa`, `02-tabliczka`, `03-oslona`, `04-pod-spodem`, `05-kamyk`,
+`06-skrzynka` (`.jpg`). Podpięte w [`matylda/js/config.js`](matylda/js/config.js)
+i cache'owane offline. Po podmianie zdjęć podbij wersję cache w
+[`matylda/sw.js`](matylda/sw.js).
+
+Treści i odpowiedzi: [`matylda/js/config.js`](matylda/js/config.js).
+
+---
+
+## 🛠️ Panel organizatora (obie gry)
+
+Wejście: **5× dotknij tytuł** u góry ekranu, albo otwórz `adres-gry/#org`.
+Możesz przeskoczyć do dowolnego etapu, zresetować grę i podejrzeć odpowiedzi.
+
+---
+
+## 🌍 Wystawienie na GitHub Pages
+
+Workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) wystawia
+całe repo przy każdym pushu na `main` (Settings → Pages → Source:
+„GitHub Actions"). Obie gry i ekran wyboru deployują się razem.
 
 ---
 
 ## ⚠️ Ważne przed imprezą
 
-- **Piwnica bez zasięgu:** poproś Anię, żeby otworzyła grę **raz z zasięgiem**
-  (na starcie) — wtedy service worker zapisze grę i będzie działać offline,
-  także po zeskanowaniu kodu w piwnicy.
-- **Graj w Safari**, nie trzeba dodawać do ekranu głównego (gra jest tak
-  ustawiona, że nawet dodana do ekranu współdzieli zapis postępu).
-- **Ania musi zacząć od kodu START** — to „frontowe drzwi".
-  Po tym kody trasy skanuje przyciskiem **OTWÓRZ APARAT** w grze. Gdyby otworzyła
-  kod trasy zwykłym aparatem, zobaczy tylko STOP (to celowe zabezpieczenie).
-- **Przetestuj całość** na swoim iPhonie 13 na wersji z GitHub Pages, zanim
-  wręczysz telefon Ani.
-
----
-
-## 🛠️ Panel organizatora (do testów i ratunku)
-
-Dwa sposoby wejścia:
-
-- **Dotknij 5× tytuł „GRA PIĄTKOWSKA"** u góry ekranu, lub
-- otwórz adres **`adres-gry/#org`** (pewniejsze, np. z zakładki).
-
-W panelu możesz przeskoczyć do dowolnego etapu, zresetować grę i podejrzeć tokeny.
-Przydatne, gdyby coś poszło nie tak na miejscu.
-
----
-
-## ✏️ Edycja treści
-
-Wszystko jest w [`js/config.js`](js/config.js): teksty zagadek, tokeny, miejsca.
-
-> Po **każdej** zmianie plików gry podbij numer wersji w
-> [`sw.js`](sw.js) (`piatkowo-v1` → `v2` → …), inaczej telefon może serwować
-> starą wersję z cache.
-
----
-
-## 🔐 Odpowiedzi (spoiler — dla organizatora)
-
-1. Piwnica
-2. Tablica ogłoszeń (szyfr: `tgbukcg paupszdn` → „tablica ogłoszeń")
-3. Skoda Elroq
-4. Bolesław Chrobry (posąg na ławeczce)
-5. Cukiernia — hasło: **„Małe fusy"**
+- **Słaby zasięg:** poproś, żeby gra została otwarta **raz z internetem** — wtedy
+  service worker zapisze ją (i zdjęcia Matyldy) do trybu offline.
+- **Ania musi zacząć od kodu START** (albo przycisku ANIA na ekranie wyboru).
+- Po **każdej** zmianie plików gry podbij numer wersji cache w odpowiednim
+  `sw.js` (`ania/sw.js` → prefix `ania-`, `matylda/sw.js` → prefix `matylda-`),
+  inaczej telefon może serwować starą wersję z cache.
+- Obie gry są na tym samym adresie (origin), więc mają **rozdzielone** klucze
+  postępu i cache — postępy Ani i Matyldy się nie mieszają.
 
 ---
 
 ## 📁 Struktura
 
 ```
-index.html              gra
-css/style.css           styl 8-bit + CRT
-js/config.js            zagadki + tokeny (tu edytujesz)
-js/game.js              logika i widoki
-js/scanner.js           skaner QR w grze (kamera)
-js/sprites.js           pixel-art
-js/audio.js             chiptune SFX
-sw.js                   offline
-tools/print-codes.html  generator kodów QR do druku
-lib/qrcode.min.js       generator QR (MIT, davidshimjs)
-lib/jsQR.min.js         dekoder QR z kamery (Apache-2.0)
-assets/fonts/           Press Start 2P (OFL)
-docker-compose.yml      lokalny serwer
-.github/workflows/      auto-deploy na Pages
+index.html                 ekran wyboru (ANIA / MATYLDA)
+docker-compose.yml         lokalny serwer (nginx)
+nginx.conf                 konfiguracja serwera
+.github/workflows/         auto-deploy na Pages
+
+ania/                      GRA ANI (z kodami QR)
+  index.html, css/, js/, lib/, assets/
+  tools/print-codes.html   generator kodów QR do druku
+  sw.js                    offline (cache: ania-)
+
+matylda/                   GRA MATYLDY (bez QR)
+  index.html, css/, js/, assets/
+  assets/photos/           zdjęcia zagadek
+  sw.js                    offline (cache: matylda-)
 ```
