@@ -1,17 +1,19 @@
 # 🎮 Gry terenowe (8-bit)
 
-Repozytorium zawiera **dwie osobne gry-podchody** w klimacie 8-bit oraz wspólny
-**ekran wyboru** gracza. Czysty HTML/CSS/JS, bez build-stepu. Działa **offline**
+Repozytorium zawiera **dwie osobne gry-podchody** i **grę planszową do nauki
+niemieckiego** w klimacie 8-bit oraz wspólny **ekran wyboru**. Czysty HTML/CSS/JS, bez build-stepu. Działa **offline**
 (service worker), na **GitHub Pages** i lokalnie przez **Docker**.
 
 | Ścieżka | Gra | Dla kogo | Mechanika |
 |---------|-----|----------|-----------|
-| `/` | Ekran wyboru | — | Dwa przyciski: ANIA / MATYLDA |
+| `/` | Ekran wyboru | — | Przyciski: ANIA / MATYLDA / NIEMIECKI 0–20 |
 | `/ania/` | Gra Piątkowska | Ania | Podchody z **kodami QR** (skaner w grze) |
 | `/matylda/` | Gra Matyldy | Matylda | Zagadki **bez QR** (wpisywanie odpowiedzi) |
+| `/deutsch/` | Zahlen-Rennen | 2 klasa SP | Plansza: **liczby 0–20 po niemiecku** |
 
 Adresy na GitHub Pages:
-`…/piatkowo-game/`, `…/piatkowo-game/ania/`, `…/piatkowo-game/matylda/`.
+`…/piatkowo-game/`, `…/piatkowo-game/ania/`, `…/piatkowo-game/matylda/`,
+`…/piatkowo-game/deutsch/`.
 
 ---
 
@@ -26,6 +28,7 @@ Potem otwórz:
 - **http://localhost:8080/** — ekran wyboru
 - **http://localhost:8080/ania/** — gra Ani
 - **http://localhost:8080/matylda/** — gra Matyldy
+- **http://localhost:8080/deutsch/** — Zahlen-Rennen (niemiecki)
 
 > To ten sam zestaw plików, który trafia na GitHub Pages. Kamerę telefonu
 > (skaner QR w grze Ani) testuj na wersji z **GitHub Pages** (https) — po adresie
@@ -35,11 +38,12 @@ Potem otwórz:
 
 ## 🧭 Ekran wyboru (root)
 
-Na `/` są dwa przyciski z avatarem:
+Na `/` są trzy przyciski:
 
 - **ANIA** → otwiera `/ania/` od razu z **kodem START** wbitym w link
   (`/ania/#start=…`), więc nie trzeba skanować kodu START.
 - **MATYLDA** → otwiera `/matylda/` (gra Matyldy nie ma żadnej blokady).
+- **NIEMIECKI 0–20** → otwiera `/deutsch/` (bez blokady).
 
 > ⚠️ Token startowy Ani jest wpisany na sztywno w [`index.html`](index.html).
 > Po zmianie `startToken` w [`ania/js/config.js`](ania/js/config.js) popraw też
@@ -129,10 +133,65 @@ Treści i odpowiedzi: [`matylda/js/config.js`](matylda/js/config.js).
 
 ---
 
-## 🛠️ Panel organizatora (obie gry)
+## 🇩🇪 Zahlen-Rennen — `/deutsch/` (liczby 0–20 po niemiecku)
+
+Gra planszowa dla 2 klasy SP, pisana pod **iPada w przeglądarce** (Safari).
+Losuje się liczba (cyfra, np. **17**), dziecko pisze ją **słowem po niemiecku**
+(`siebzehn`) i idzie pionkiem po planszy 30 pól do mety.
+
+| Sytuacja | Ruch |
+|---|---|
+| Dobrze za 1. razem | **+3 pola** |
+| Dobrze za 2. razem | **+1 pole** |
+| Dobrze z podpowiedzią (żarówka) | **+1 pole** |
+| Każdy błąd | **−1 pole** (nie mniej niż START) |
+| Wejście na dół drabiny krokiem do przodu | skok w górę (6→11, 14→19, 22→26) |
+
+Po 2 błędach gra pokazuje poprawne słowo i trzeba je **przepisać** (bez kary) —
+dopiero wtedy tura się kończy.
+
+**Jak gra uczy:**
+- po błędzie literki są pokolorowane (zielone = dobrze, czerwone = źle,
+  `_` = brakuje litery) + podpowiedzi do typowych pułapek polskich dzieci:
+  *sechzehn* (bez S), *siebzehn* (bez EN), [aj] = EI, [oj] = EU, [c] = Z,
+  długie [i] = IE, ciche H w *zehn*, kropki w *fünf*/*zwölf*;
+- 🔊 **POSŁUCHAJ** — wymowa niemieckim głosem iPada (Web Speech API, offline);
+  po każdej odpowiedzi gra sama czyta poprawne słowo (chyba że dźwięk OFF);
+- **mądre losowanie** — liczby, w których dziecko się myli, wypadają częściej
+  (historia zapamiętywana per imię);
+- **ściąga 0–20** z wymową (z ekranu tytułowego i z planszy, nie w trakcie
+  pytania).
+
+**Umlauty:** przyciski **ä ö ü** pod polem odpowiedzi. `fuenf` / `zwoelf` są
+zaliczane (z uwagą „ładniej z kropkami”), `funf` bez kropek to **błąd** z
+podpowiedzią. Wielkość liter i spacje (`fünf zehn`) nie mają znaczenia.
+
+**Tryby:** 1 gracz (licznik rund + rekord) albo 2–4 graczy na zmianę na jednym
+tablecie (każdy wpisuje swoje imię, ma swój kolor pionka).
+
+**Pisanie — przełącznik `PISZĘ: KLAWIATURA / RYSIK`:**
+- *KLAWIATURA* — po wylosowaniu pole od razu dostaje fokus (fizyczna klawiatura
+  albo ekranowa wyskakuje sama). Enter = SPRAWDŹ / DALEJ / LOSUJ.
+- *RYSIK* — duże pole do pisania; iPad sam zamienia pismo na tekst (**Scribble**),
+  klawiatura ekranowa nie wyskakuje.
+
+> 💡 **Na iPadzie dodaj klawiaturę Deutsch** (Ustawienia → Ogólne → Klawiatura →
+> Klawiatury → Dodaj nową). Scribble rozpoznaje pismo w językach dodanych
+> klawiatur — wtedy lepiej łapie niemieckie słowa i ü/ö. Na klawiaturze
+> ekranowej ü/ö są też pod przytrzymaniem u/o.
+
+Stan gry jest w `localStorage` — odświeżenie strony nie gubi rozgrywki
+(przycisk **GRAJ DALEJ**). Treści, słowa, podpowiedzi, punktacja i drabiny:
+[`deutsch/js/config.js`](deutsch/js/config.js).
+
+---
+
+## 🛠️ Panel organizatora (wszystkie gry)
 
 Wejście: **5× dotknij tytuł** u góry ekranu, albo otwórz `adres-gry/#org`.
 Możesz przeskoczyć do dowolnego etapu, zresetować grę i podejrzeć odpowiedzi.
+W Zahlen-Rennen panel pokazuje trudne liczby każdego dziecka i pozwala
+zresetować grę / wyczyścić statystyki.
 
 ---
 
@@ -140,7 +199,7 @@ Możesz przeskoczyć do dowolnego etapu, zresetować grę i podejrzeć odpowiedz
 
 Workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) wystawia
 całe repo przy każdym pushu na `main` (Settings → Pages → Source:
-„GitHub Actions"). Obie gry i ekran wyboru deployują się razem.
+„GitHub Actions"). Wszystkie gry i ekran wyboru deployują się razem.
 
 ---
 
@@ -150,17 +209,18 @@ całe repo przy każdym pushu na `main` (Settings → Pages → Source:
   service worker zapisze ją (i zdjęcia Matyldy) do trybu offline.
 - **Ania musi zacząć od kodu START** (albo przycisku ANIA na ekranie wyboru).
 - Po **każdej** zmianie plików gry podbij numer wersji cache w odpowiednim
-  `sw.js` (`ania/sw.js` → prefix `ania-`, `matylda/sw.js` → prefix `matylda-`),
-  inaczej telefon może serwować starą wersję z cache.
-- Obie gry są na tym samym adresie (origin), więc mają **rozdzielone** klucze
-  postępu i cache — postępy Ani i Matyldy się nie mieszają.
+  `sw.js` (`ania/sw.js` → prefix `ania-`, `matylda/sw.js` → prefix `matylda-`,
+  `deutsch/sw.js` → prefix `deutsch-`), inaczej telefon/tablet może serwować
+  starą wersję z cache.
+- Wszystkie gry są na tym samym adresie (origin), więc mają **rozdzielone** klucze
+  postępu i cache — postępy się nie mieszają.
 
 ---
 
 ## 📁 Struktura
 
 ```
-index.html                 ekran wyboru (ANIA / MATYLDA)
+index.html                 ekran wyboru (ANIA / MATYLDA / NIEMIECKI)
 docker-compose.yml         lokalny serwer (nginx)
 nginx.conf                 konfiguracja serwera
 .github/workflows/         auto-deploy na Pages
@@ -174,4 +234,9 @@ matylda/                   GRA MATYLDY (bez QR)
   index.html, css/, js/, assets/
   assets/photos/           zdjęcia zagadek
   sw.js                    offline (cache: matylda-)
+
+deutsch/                   ZAHLEN-RENNEN (niemiecki 0–20)
+  index.html, css/, js/, assets/
+  js/config.js             słowa, podpowiedzi, punktacja, drabiny
+  sw.js                    offline (cache: deutsch-)
 ```

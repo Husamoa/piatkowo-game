@@ -122,6 +122,29 @@
         width: 33px;
         height: 45px;
       }
+      .pick.deutsch {
+        background: var(--ink);
+        font-size: 13px;
+      }
+      .pick .flag {
+        display: flex;
+        flex-direction: column;
+        width: 33px;
+        height: 24px;
+        box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.55);
+      }
+      .pick .flag i {
+        flex: 1;
+      }
+      .pick .flag i:nth-child(1) {
+        background: #0d0f16;
+      }
+      .pick .flag i:nth-child(2) {
+        background: var(--red);
+      }
+      .pick .flag i:nth-child(3) {
+        background: var(--accent);
+      }
     </style>
   </head>
   <body>
@@ -138,6 +161,9 @@
       </a>
       <a class="pick matylda" href="./matylda/">
         <canvas class="mini" data-av aria-hidden="true"></canvas>MATYLDA
+      </a>
+      <a class="pick deutsch" href="./deutsch/">
+        <span class="flag" aria-hidden="true"><i></i><i></i><i></i></span>NIEMIECKI 0–20
       </a>
     </div>
 
@@ -194,12 +220,16 @@
       });
 
       // Sprzątanie po starym deployu: wyrejestruj service worker roota (dawna gra
-      // pod adresem głównym). NIE ruszamy SW z /ania/ ani /matylda/.
+      // pod adresem głównym). NIE ruszamy SW z /ania/, /matylda/ ani /deutsch/.
       if ("serviceWorker" in navigator && navigator.serviceWorker.getRegistrations) {
         navigator.serviceWorker.getRegistrations().then(function (regs) {
           regs.forEach(function (reg) {
             var scope = reg.scope || "";
-            if (scope.indexOf("/ania/") === -1 && scope.indexOf("/matylda/") === -1) {
+            if (
+              scope.indexOf("/ania/") === -1 &&
+              scope.indexOf("/matylda/") === -1 &&
+              scope.indexOf("/deutsch/") === -1
+            ) {
               reg.unregister();
             }
           });
