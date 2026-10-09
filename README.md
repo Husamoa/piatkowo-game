@@ -11,9 +11,13 @@ niemieckiego** w klimacie 8-bit oraz wspólny **ekran wyboru**. Czysty HTML/CSS/
 | `/matylda/` | Gra Matyldy | Matylda | Zagadki **bez QR** (wpisywanie odpowiedzi) |
 | `/deutsch/` | Zahlen-Rennen | 2 klasa SP | Plansza: **liczby 0–20 po niemiecku** |
 
-Adresy na GitHub Pages:
-`…/piatkowo-game/`, `…/piatkowo-game/ania/`, `…/piatkowo-game/matylda/`,
-`…/piatkowo-game/deutsch/`.
+### 🔗 Linki (GitHub Pages)
+
+- **Ekran wyboru:** https://husamoa.github.io/piatkowo-game/
+- **Zahlen-Rennen (niemiecki 0–20):** https://husamoa.github.io/piatkowo-game/deutsch/
+- **Gra Matyldy:** https://husamoa.github.io/piatkowo-game/matylda/
+- **Gra Ani:** wejście przyciskiem **ANIA** na ekranie wyboru albo kodem START
+  (sam adres `…/ania/` bez kodu pokazuje ekran STOP).
 
 ---
 
@@ -134,6 +138,9 @@ Treści i odpowiedzi: [`matylda/js/config.js`](matylda/js/config.js).
 ---
 
 ## 🇩🇪 Zahlen-Rennen — `/deutsch/` (liczby 0–20 po niemiecku)
+
+*Zahlen-Rennen* = po niemiecku „wyścig liczb” (*die Zahlen* — liczby,
+*das Rennen* — wyścig). Gra: https://husamoa.github.io/piatkowo-game/deutsch/
 
 Gra planszowa dla 2 klasy SP, pisana pod **iPada w przeglądarce** (Safari).
 Losuje się liczba (cyfra, np. **17**), dziecko pisze ją **słowem po niemiecku**
