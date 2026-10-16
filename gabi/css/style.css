@@ -712,3 +712,36 @@ body {
   text-transform: none;
   opacity: 0.75;
 }
+
+/* ===== GABI — ekran statystyk ===== */
+.stats-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 2px dotted var(--panel2);
+  padding-bottom: 6px;
+}
+.stat-lbl {
+  font-size: 9px;
+  color: var(--dim);
+  text-align: left;
+}
+.stat-val {
+  font-size: 11px;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.stats-note {
+  font-size: 9px;
+  color: var(--pink);
+  line-height: 1.7;
+  text-align: center;
+  margin-top: 2px;
+}

@@ -45,6 +45,57 @@
     return st.phase === "done" || st.stage >= N;
   }
 
+  /* ---------- statystyki (per gra; zerowane przy RESECIE) ---------- */
+  var STATS_KEY = CFG.statsKey || "gabi_stats_v1";
+  function defaultStats() {
+    return { wrong: 0, hints: 0, maps: 0, scans: 0, startTime: null, endTime: null, wrongByStage: {} };
+  }
+  function loadStats() {
+    try {
+      var s = JSON.parse(localStorage.getItem(STATS_KEY));
+      if (s && typeof s === "object") {
+        var d = defaultStats();
+        for (var k in d) if (s[k] == null) s[k] = d[k];
+        if (typeof s.wrongByStage !== "object" || !s.wrongByStage) s.wrongByStage = {};
+        return s;
+      }
+    } catch (_) {}
+    return defaultStats();
+  }
+  function saveStats(s) {
+    try {
+      localStorage.setItem(STATS_KEY, JSON.stringify(s));
+    } catch (_) {}
+  }
+  function resetStats() {
+    saveStats(defaultStats());
+  }
+  function markStart() {
+    var s = loadStats();
+    if (!s.startTime) {
+      s.startTime = Date.now();
+      saveStats(s);
+    }
+  }
+  function markEnd() {
+    var s = loadStats();
+    if (!s.endTime) {
+      s.endTime = Date.now();
+      saveStats(s);
+    }
+  }
+  function bumpStat(key) {
+    var s = loadStats();
+    s[key] = (s[key] || 0) + 1;
+    saveStats(s);
+  }
+  function bumpWrong(stageId) {
+    var s = loadStats();
+    s.wrong = (s.wrong || 0) + 1;
+    s.wrongByStage[stageId] = (s.wrongByStage[stageId] || 0) + 1;
+    saveStats(s);
+  }
+
   /* ---------- "frontowe drzwi" ---------- */
   function hasEntered() {
     return localStorage.getItem(CFG.enteredKey) === "1";
@@ -294,6 +345,7 @@
   /* ---------- EKRAN ZADANIA ---------- */
   function renderSolve(st) {
     clearScreen();
+    markStart(); // pierwsze wejście w zadanie = początek liczenia czasu
     var stage = STAGES[st.stage];
     var kids = [topBar(), progressDots(st.stage)];
 
@@ -313,6 +365,7 @@
           Audio8.unlock();
           Audio8.blip();
           hintBox.classList.toggle("hidden");
+          if (!hintBox.classList.contains("hidden")) bumpStat("hints"); // policz odsłonięcie
           hintBtn.textContent = hintBox.classList.contains("hidden") ? "PODPOWIEDŹ" : "UKRYJ PODPOWIEDŹ";
         },
       });
@@ -374,6 +427,7 @@
         saveState(st);
         renderSuccess(stage);
       } else {
+        bumpWrong(stage.id);
         Audio8.error();
         overlay("error", "JESZCZE NIE!", res.msg || "Spróbujcie jeszcze raz.");
       }
@@ -446,6 +500,7 @@
           onclick: function () {
             Audio8.unlock();
             Audio8.blip();
+            bumpStat("maps");
           },
         })
       );
@@ -505,6 +560,7 @@
   /* ---------- EKRAN URODZINOWY ---------- */
   function renderVictory() {
     clearScreen();
+    markEnd(); // zatrzymaj licznik czasu
     var confetti = h("div", { class: "confetti" });
     var colors = ["#e43b44", "#ffd23f", "#4a7fe0", "#3fa34d", "#c25bd6", "#ff6fae", "#59d5e0"];
     for (var i = 0; i < 32; i++) {
@@ -533,10 +589,99 @@
           Sprites.el("heart", 5),
           Sprites.el("heart", 7),
           Sprites.el("heart", 5)
-        )
+        ),
+        h("button", {
+          class: "btn btn-sm",
+          text: "📊 STATYSTYKI",
+          onclick: function () {
+            Audio8.unlock();
+            Audio8.blip();
+            showStats();
+          },
+        })
       )
     );
     Audio8.victory();
+  }
+
+  /* ---------- ekran statystyk ---------- */
+  function pluralProba(n) {
+    if (n === 1) return "próba";
+    var d = n % 10,
+      dd = n % 100;
+    if (d >= 2 && d <= 4 && (dd < 10 || dd >= 20)) return "próby";
+    return "prób";
+  }
+  function fmtDuration(ms) {
+    if (!ms || ms < 0) return "—";
+    var sec = Math.floor(ms / 1000);
+    var hh = Math.floor(sec / 3600);
+    var mm = Math.floor((sec % 3600) / 60);
+    var ss = sec % 60;
+    if (hh > 0) return hh + " h " + mm + " min";
+    if (mm > 0) return mm + " min " + ss + " s";
+    return ss + " s";
+  }
+  function showStats() {
+    var s = loadStats();
+    var dur = s.startTime ? (s.endTime || Date.now()) - s.startTime : 0;
+
+    // najtrudniejsze zadanie (najwięcej błędnych prób)
+    var worstId = null,
+      worstN = 0;
+    for (var k in s.wrongByStage) {
+      if (s.wrongByStage[k] > worstN) {
+        worstN = s.wrongByStage[k];
+        worstId = k;
+      }
+    }
+
+    var rows = [
+      ["⏱️ Czas gry", fmtDuration(dur)],
+      ["✉️ Zeskanowane koperty", String(s.scans || 0)],
+      ["❌ Błędne odpowiedzi", String(s.wrong || 0)],
+      ["💡 Użyte podpowiedzi", String(s.hints || 0)],
+      ["📍 Otwarcia Google Maps", String(s.maps || 0)],
+    ];
+
+    var list = h("div", { class: "stats-list" });
+    rows.forEach(function (r) {
+      list.appendChild(
+        h(
+          "div",
+          { class: "stat-row" },
+          h("span", { class: "stat-lbl", text: r[0] }),
+          h("span", { class: "stat-val", text: r[1] })
+        )
+      );
+    });
+
+    var note = worstId
+      ? h("p", {
+          class: "stats-note",
+          text: "🤔 Najtrudniejsze: Zadanie " + worstId + " (" + worstN + " " + pluralProba(worstN) + ")",
+        })
+      : null;
+
+    var ov = h(
+      "div",
+      { class: "overlay overlay-info" },
+      h(
+        "div",
+        { class: "overlay-box" },
+        h("h3", { class: "overlay-title", text: "STATYSTYKI" }),
+        list,
+        note,
+        h("button", {
+          class: "btn",
+          text: "ZAMKNIJ",
+          onclick: function () {
+            ov.remove();
+          },
+        })
+      )
+    );
+    app().appendChild(ov);
   }
 
   /* ---------- nakładki ---------- */
@@ -676,6 +821,7 @@
           text: "RESET GRY",
           onclick: function () {
             saveState({ stage: 0, phase: "solve" });
+            resetStats();
             ov.remove();
             renderTitle();
           },
@@ -712,6 +858,7 @@
     // właściwy kod bieżącego etapu
     if (token === expected) {
       var stage = STAGES[st.stage];
+      bumpStat("scans");
       if (stage.final) {
         saveState({ stage: N, phase: "done" });
         renderVictory();
