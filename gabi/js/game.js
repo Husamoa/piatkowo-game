@@ -422,6 +422,12 @@
       for (var key in inputs) fields[key] = inputs[key].value;
       var res = verify(stage, fields);
       if (res.ok) {
+        if (stage.saveAnswerAs) {
+          // zapisz odpowiedź (np. wierszyk z zad. 4), by pokazać ją na końcu gry
+          var sv = loadStats();
+          sv[stage.saveAnswerAs] = (fields.main || "").trim();
+          saveStats(sv);
+        }
         Audio8.success();
         st.phase = "map";
         saveState(st);
@@ -590,18 +596,59 @@
           Sprites.el("heart", 7),
           Sprites.el("heart", 5)
         ),
+        h(
+          "div",
+          { class: "win-actions" },
+          h("button", {
+            class: "btn btn-sm",
+            text: "📊 STATYSTYKI",
+            onclick: function () {
+              Audio8.unlock();
+              Audio8.blip();
+              showStats();
+            },
+          }),
+          hasSavedPoem()
+            ? h("button", {
+                class: "btn btn-sm",
+                text: "📜 POKAŻ WIERSZYK",
+                onclick: function () {
+                  Audio8.unlock();
+                  Audio8.blip();
+                  showPoem();
+                },
+              })
+            : null
+        )
+      )
+    );
+    Audio8.victory();
+  }
+
+  function hasSavedPoem() {
+    var p = loadStats().poem;
+    return !!(p && p.trim());
+  }
+  function showPoem() {
+    var poem = (loadStats().poem || "").trim();
+    var ov = h(
+      "div",
+      { class: "overlay overlay-info" },
+      h(
+        "div",
+        { class: "overlay-box" },
+        h("h3", { class: "overlay-title", text: "WASZ WIERSZYK" }),
+        h("p", { class: "poem-text", text: poem || "Brak zapisanego wierszyka." }),
         h("button", {
-          class: "btn btn-sm",
-          text: "📊 STATYSTYKI",
+          class: "btn",
+          text: "ZAMKNIJ",
           onclick: function () {
-            Audio8.unlock();
-            Audio8.blip();
-            showStats();
+            ov.remove();
           },
         })
       )
     );
-    Audio8.victory();
+    app().appendChild(ov);
   }
 
   /* ---------- ekran statystyk ---------- */

@@ -745,3 +745,25 @@ body {
   text-align: center;
   margin-top: 2px;
 }
+
+/* przyciski na ekranie urodzinowym (statystyki / wierszyk) */
+.win-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+/* treść wierszyka w nakładce */
+.poem-text {
+  width: 100%;
+  white-space: pre-wrap;
+  text-align: left;
+  font-size: 11px;
+  line-height: 1.9;
+  color: var(--ink);
+  background: var(--bg0);
+  border: 3px solid var(--panel2);
+  padding: 12px;
+  max-height: 50vh;
+  overflow-y: auto;
+}

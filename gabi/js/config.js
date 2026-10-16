@@ -132,9 +132,10 @@ window.GAME_CONFIG = {
       check: {
         type: "allWords",
         // rdzenie słów (bez ogonków) — pasują do różnych odmian
-        stems: ["kalafior", "pantof", "laskot", "szczypior", "galaret", "zyraf", "kalosz", "babel"],
+        stems: ["kalafior", "pantof", "laskot", "szczypior", "galare", "zyraf", "kalosz", "babel"],
       },
       multiline: true,
+      saveAnswerAs: "poem", // zapisz treść wierszyka, by pokazać ją na końcu gry
       inputPlaceholder: "wpiszcie tu swój wierszyk...",
       mapImage: "assets/maps/map-plac-rowerowy.png",
       mapLink: "https://maps.app.goo.gl/VxBkwQgEBFMMtFAF6",
