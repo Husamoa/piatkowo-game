@@ -767,3 +767,20 @@ body {
   max-height: 50vh;
   overflow-y: auto;
 }
+
+/* odpowiedzi graczy w panelu organizatora (mogą mieć wiele linii) */
+.answer-tok {
+  white-space: pre-wrap;
+  border-bottom: 1px dotted var(--panel2);
+  padding-bottom: 5px;
+}
+.answer-tok b {
+  color: var(--accent2);
+}
+
+/* Nakładki nie mogą przerosnąć ekranu — ograniczenie wysokości + przewijanie
+   (np. panel organizatora z rozwiniętą listą odpowiedzi i wierszem). */
+.overlay-box {
+  max-height: 90dvh;
+  overflow-y: auto;
+}

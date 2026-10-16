@@ -48,7 +48,7 @@
   /* ---------- statystyki (per gra; zerowane przy RESECIE) ---------- */
   var STATS_KEY = CFG.statsKey || "gabi_stats_v1";
   function defaultStats() {
-    return { wrong: 0, hints: 0, maps: 0, scans: 0, startTime: null, endTime: null, wrongByStage: {} };
+    return { wrong: 0, hints: 0, maps: 0, scans: 0, startTime: null, endTime: null, wrongByStage: {}, answers: {} };
   }
   function loadStats() {
     try {
@@ -57,6 +57,7 @@
         var d = defaultStats();
         for (var k in d) if (s[k] == null) s[k] = d[k];
         if (typeof s.wrongByStage !== "object" || !s.wrongByStage) s.wrongByStage = {};
+        if (typeof s.answers !== "object" || !s.answers) s.answers = {};
         return s;
       }
     } catch (_) {}
@@ -93,6 +94,22 @@
     var s = loadStats();
     s.wrong = (s.wrong || 0) + 1;
     s.wrongByStage[stageId] = (s.wrongByStage[stageId] || 0) + 1;
+    saveStats(s);
+  }
+  // czytelny zapis odpowiedzi gracza (do panelu organizatora)
+  function answerToString(stage, fields) {
+    if (stage.check && stage.check.type === "houses") {
+      return stage.check.houses
+        .map(function (house, i) {
+          return house.label + ": " + ((fields["house" + i] || "").trim() || "—");
+        })
+        .join("\n");
+    }
+    return (fields.main || "").trim();
+  }
+  function saveAnswer(stage, fields) {
+    var s = loadStats();
+    s.answers[stage.id] = answerToString(stage, fields);
     saveStats(s);
   }
 
@@ -420,6 +437,7 @@
       Audio8.unlock();
       var fields = {};
       for (var key in inputs) fields[key] = inputs[key].value;
+      saveAnswer(stage, fields); // zapisz odpowiedź gracza (ostatnia próba)
       var res = verify(stage, fields);
       if (res.ok) {
         if (stage.saveAnswerAs) {
@@ -854,6 +872,21 @@
       );
     });
 
+    // odpowiedzi graczy (ostatnia próba każdego zadania)
+    var savedStats = loadStats();
+    var answers = h("details", { class: "org-tokens" }, h("summary", { text: "Pokaż odpowiedzi graczy" }));
+    STAGES.forEach(function (s) {
+      var a = savedStats.answers[s.id];
+      answers.appendChild(
+        h(
+          "div",
+          { class: "tok answer-tok" },
+          h("b", { text: "Z" + s.id + ": " }),
+          a != null && a !== "" ? a : "—"
+        )
+      );
+    });
+
     var ov = h(
       "div",
       { class: "overlay overlay-info" },
@@ -873,6 +906,7 @@
             renderTitle();
           },
         }),
+        answers,
         tokens,
         h("button", {
           class: "btn",
