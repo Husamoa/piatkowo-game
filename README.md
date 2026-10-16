@@ -1,14 +1,15 @@
 # 🎮 Gry terenowe (8-bit)
 
-Repozytorium zawiera **dwie osobne gry-podchody** i **grę planszową do nauki
+Repozytorium zawiera **trzy osobne gry-podchody** i **grę planszową do nauki
 niemieckiego** w klimacie 8-bit oraz wspólny **ekran wyboru**. Czysty HTML/CSS/JS, bez build-stepu. Działa **offline**
 (service worker), na **GitHub Pages** i lokalnie przez **Docker**.
 
 | Ścieżka | Gra | Dla kogo | Mechanika |
 |---------|-----|----------|-----------|
-| `/` | Ekran wyboru | — | Przyciski: ANIA / MATYLDA / NIEMIECKI 0–20 |
+| `/` | Ekran wyboru | — | Przyciski: ANIA / MATYLDA / GABI / NIEMIECKI 0–20 |
 | `/ania/` | Gra Piątkowska | Ania | Podchody z **kodami QR** (skaner w grze) |
 | `/matylda/` | Gra Matyldy | Matylda | Zagadki **bez QR** (wpisywanie odpowiedzi) |
+| `/gabi/` | Urodziny Gabi | Gabi (13 lat) | **Skan → zadanie → odpowiedź → mapa → skan** |
 | `/deutsch/` | Zahlen-Rennen | 2 klasa SP | Plansza: **liczby 0–20 po niemiecku** |
 
 ### 🔗 Linki (GitHub Pages)
@@ -18,6 +19,8 @@ niemieckiego** w klimacie 8-bit oraz wspólny **ekran wyboru**. Czysty HTML/CSS/
 - **Gra Matyldy:** https://husamoa.github.io/piatkowo-game/matylda/
 - **Gra Ani:** wejście przyciskiem **ANIA** na ekranie wyboru albo kodem START
   (sam adres `…/ania/` bez kodu pokazuje ekran STOP).
+- **Urodziny Gabi:** wejście przyciskiem **GABI** na ekranie wyboru albo kodem START
+  (sam adres `…/gabi/` bez kodu pokazuje ekran STOP).
 
 ---
 
@@ -32,6 +35,7 @@ Potem otwórz:
 - **http://localhost:8080/** — ekran wyboru
 - **http://localhost:8080/ania/** — gra Ani
 - **http://localhost:8080/matylda/** — gra Matyldy
+- **http://localhost:8080/gabi/** — Urodziny Gabi
 - **http://localhost:8080/deutsch/** — Zahlen-Rennen (niemiecki)
 
 > To ten sam zestaw plików, który trafia na GitHub Pages. Kamerę telefonu
@@ -47,11 +51,13 @@ Na `/` są trzy przyciski:
 - **ANIA** → otwiera `/ania/` od razu z **kodem START** wbitym w link
   (`/ania/#start=…`), więc nie trzeba skanować kodu START.
 - **MATYLDA** → otwiera `/matylda/` (gra Matyldy nie ma żadnej blokady).
+- **GABI** → otwiera `/gabi/` od razu z **kodem START** wbitym w link
+  (`/gabi/#start=…`), więc nie trzeba skanować kodu START.
 - **NIEMIECKI 0–20** → otwiera `/deutsch/` (bez blokady).
 
-> ⚠️ Token startowy Ani jest wpisany na sztywno w [`index.html`](index.html).
-> Po zmianie `startToken` w [`ania/js/config.js`](ania/js/config.js) popraw też
-> link w `index.html`.
+> ⚠️ Tokeny startowe Ani i Gabi są wpisane na sztywno w [`index.html`](index.html).
+> Po zmianie `startToken` w [`ania/js/config.js`](ania/js/config.js) lub
+> [`gabi/js/config.js`](gabi/js/config.js) popraw też link w `index.html`.
 
 ---
 
@@ -101,6 +107,60 @@ przypadkiem. **Ta blokada nadal działa.**
 5. Cukiernia — hasło: **„Małe fusy"**
 
 Treści i tokeny: [`ania/js/config.js`](ania/js/config.js).
+
+---
+
+## 🎂 Urodziny Gabi — `/gabi/` (z kodami QR, zadania w aplikacji)
+
+Gra urodzinowa (13. urodziny Gabi). Mechanika jest **odwrotna niż u Ani**:
+
+1. **Skan kodu** (START na początek, potem koperty w terenie) → pojawia się **ZADANIE**.
+2. Gracze rozwiązują zadanie i **wpisują odpowiedź w aplikacji**.
+3. Po poprawnej odpowiedzi: **zdjęcie mapy z pinezką** (wbudowane, nie link)
+   + **podpowiedź** (rymowanka) + guzik **ZESKANUJ KOD**.
+4. Idą pod pinezkę, znajdują kopertę, skanują → kolejne zadanie… aż do **nagrody**
+   (Król Chrobry, duże drzewo) → ekran urodzinowy.
+
+### Wejście „frontowymi drzwiami"
+
+Jak u Ani: do gry wchodzi się **tylko** przez **kod START** (albo przycisk GABI na
+ekranie wyboru). Zeskanowanie koperty zwykłym aparatem bez wcześniejszego wejścia
+pokazuje ekran **STOP**. Kody zalicza wyłącznie skaner w grze (na ekranie mapy)
+lub ręczne wpisanie — i tylko we właściwej kolejności.
+
+### Wygenerowanie i wydruk kodów QR
+
+1. Otwórz [`gabi/tools/print-codes.html`](gabi/tools/print-codes.html)
+   (lokalnie lub `http://localhost:8080/gabi/tools/print-codes.html`).
+2. Sprawdź adres gry (domyślnie `…/piatkowo-game/gabi/`).
+3. Kliknij **Generuj kody** → **Ctrl/Cmd+P** → wydrukuj.
+
+| Kod | Gdzie nakleić | Odsłania |
+|-----|---------------|----------|
+| **START** | dajesz Gabi na początek | Zadanie 1 |
+| 1 | Siłownia zewnętrzna (przy biegaczu) | Zadanie 2 |
+| 2 | Pod Baśniowym Zamkiem (przedszkole) | Zadanie 3 |
+| 3 | LO XV (przy donicach) | Zadanie 4 |
+| 4 | Plac rowerowy (Poradnik Młodego Rowerzysty) | Zadanie 5 |
+| 5 | Tyrolka (zjazd na linie) | Zadanie 6 |
+| 6 | Wiadukt PST | Zadanie 7 |
+| 7 | Spektakularny plac zabaw (duży pająk) | Zadanie 8 |
+| 8 | 🏆 Przy nagrodzie (Pomnik B. Chrobrego, duże drzewo) | Ekran urodzinowy |
+
+> Mapy to gotowe zdjęcia z pinezką w [`gabi/assets/maps/`](gabi/assets/maps/)
+> (wygenerowane z OpenStreetMap). Zcache'owane w [`gabi/sw.js`](gabi/sw.js),
+> więc działają offline.
+
+### Odpowiedzi Gabi (spoiler)
+
+1. Marek, Ewa, Tomek, Ala, Piotrek, Kasia, Zosia, Ola
+2. **1078** (liczby liter urządzeń z odpowiedzi 1/2/3)
+3. **Jego syn** (akceptowane też samo „syn")
+4. Wierszyk — musi zawierać wszystkie 8 słów (w dowolnej odmianie)
+5. Dom 1: Ania + papuga · Dom 2: Piotr + kot · Dom 3: Ola + żółw · Dom 4: Marek + pies
+6. **63** · 7. **20** · 8. **82278**
+
+Treści, tokeny i reguły sprawdzania odpowiedzi: [`gabi/js/config.js`](gabi/js/config.js).
 
 ---
 
@@ -214,11 +274,11 @@ całe repo przy każdym pushu na `main` (Settings → Pages → Source:
 
 - **Słaby zasięg:** poproś, żeby gra została otwarta **raz z internetem** — wtedy
   service worker zapisze ją (i zdjęcia Matyldy) do trybu offline.
-- **Ania musi zacząć od kodu START** (albo przycisku ANIA na ekranie wyboru).
+- **Ania i Gabi muszą zacząć od kodu START** (albo przycisku na ekranie wyboru).
 - Po **każdej** zmianie plików gry podbij numer wersji cache w odpowiednim
   `sw.js` (`ania/sw.js` → prefix `ania-`, `matylda/sw.js` → prefix `matylda-`,
-  `deutsch/sw.js` → prefix `deutsch-`), inaczej telefon/tablet może serwować
-  starą wersję z cache.
+  `gabi/sw.js` → prefix `gabi-`, `deutsch/sw.js` → prefix `deutsch-`), inaczej
+  telefon/tablet może serwować starą wersję z cache.
 - Wszystkie gry są na tym samym adresie (origin), więc mają **rozdzielone** klucze
   postępu i cache — postępy się nie mieszają.
 
@@ -227,7 +287,7 @@ całe repo przy każdym pushu na `main` (Settings → Pages → Source:
 ## 📁 Struktura
 
 ```
-index.html                 ekran wyboru (ANIA / MATYLDA / NIEMIECKI)
+index.html                 ekran wyboru (ANIA / MATYLDA / GABI / NIEMIECKI)
 docker-compose.yml         lokalny serwer (nginx)
 nginx.conf                 konfiguracja serwera
 .github/workflows/         auto-deploy na Pages
@@ -241,6 +301,13 @@ matylda/                   GRA MATYLDY (bez QR)
   index.html, css/, js/, assets/
   assets/photos/           zdjęcia zagadek
   sw.js                    offline (cache: matylda-)
+
+gabi/                      URODZINY GABI (skan → zadanie → mapa → skan)
+  index.html, css/, js/, lib/, assets/
+  assets/maps/             zdjęcia map z pinezką (OpenStreetMap)
+  js/config.js             zadania, odpowiedzi, tokeny, mapy
+  tools/print-codes.html   generator kodów QR do druku
+  sw.js                    offline (cache: gabi-)
 
 deutsch/                   ZAHLEN-RENNEN (niemiecki 0–20)
   index.html, css/, js/, assets/

@@ -1,0 +1,714 @@
+/* ===== GRA PIĄTKOWSKA — styl 8-bit ===== */
+@font-face {
+  font-family: "PressStart";
+  src: url("../assets/fonts/PressStart2P-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+
+:root {
+  --bg0: #0b0b1a;
+  --bg1: #17163a;
+  --ink: #f4f4f8;
+  --dim: #b9b6d6;
+  --accent: #ffd23f;
+  --accent2: #59d5e0;
+  --red: #e43b44;
+  --green: #3fa34d;
+  --pink: #ff9ec7;
+  --panel: #241f4a;
+  --panel2: #3a3470;
+  --shadow: #000;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* iOS ignoruje user-scalable=no — to wyłącza zoom z podwójnego tapnięcia
+   na klikalnych elementach (np. 5x tap w tytuł = panel organizatora),
+   zostawiając pinch-zoom. */
+button,
+.btn,
+.link,
+.iconbtn,
+.top-title,
+.win-title,
+.dot,
+summary {
+  touch-action: manipulation;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: "PressStart", "Courier New", monospace;
+  color: var(--ink);
+  background: var(--bg0);
+  background-image: radial-gradient(circle at 50% 0%, #241f4a 0%, #0b0b1a 70%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.02) 0 2px, transparent 2px 4px);
+  -webkit-font-smoothing: none;
+  image-rendering: pixelated;
+  overflow-x: hidden;
+  overflow-y: auto;
+  line-height: 1.7;
+  letter-spacing: 0.5px;
+}
+
+/* CRT scanlines */
+#scanlines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 90;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.16) 0 1px,
+    transparent 1px 3px
+  );
+  opacity: 0.55;
+}
+#scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.75);
+}
+
+#app {
+  min-height: 100%;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+#screen {
+  width: 100%;
+  max-width: 480px;
+  padding: 14px 16px 40px;
+}
+
+.view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  animation: fadein 0.25s ease-out;
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- topbar ---- */
+.topbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 3px solid var(--panel2);
+  padding-bottom: 10px;
+}
+.top-title {
+  font-size: 10px;
+  color: var(--accent2);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.iconbtn {
+  font-family: inherit;
+  font-size: 8px;
+  color: var(--ink);
+  background: var(--panel);
+  border: 2px solid var(--panel2);
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
+/* ---- progress dots ---- */
+.dots {
+  display: flex;
+  gap: 8px;
+}
+.dot {
+  width: 12px;
+  height: 12px;
+  background: var(--panel);
+  border: 2px solid var(--panel2);
+}
+.dot.done {
+  background: var(--green);
+  border-color: #bff0c0;
+}
+.dot.cur {
+  background: var(--accent);
+  border-color: #fff;
+  animation: blink 1s steps(2) infinite;
+}
+
+/* ---- sprites ---- */
+.sprite {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  display: block;
+  filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.55));
+}
+.title-art,
+.stage-icon,
+.win-gift,
+.burst {
+  display: flex;
+  justify-content: center;
+}
+
+/* ---- title ---- */
+.game-title {
+  font-size: clamp(18px, 7vw, 30px);
+  color: var(--accent);
+  line-height: 1.3;
+  text-shadow: 3px 3px 0 var(--red), 6px 6px 0 rgba(0, 0, 0, 0.5);
+}
+.game-sub {
+  font-size: 9px;
+  color: var(--dim);
+}
+.game-for {
+  font-size: 11px;
+  color: var(--pink);
+  margin-top: 2px;
+}
+
+/* ---- riddle ---- */
+.stage-label {
+  font-size: 10px;
+  color: var(--accent2);
+}
+.dialog {
+  width: 100%;
+  background: var(--panel);
+  color: var(--ink);
+  border: 4px solid var(--ink);
+  box-shadow: 0 0 0 4px var(--bg0), 8px 8px 0 rgba(0, 0, 0, 0.5),
+    inset 0 0 0 3px var(--panel2);
+  padding: 18px 16px;
+}
+.riddle-text {
+  font-size: 12px;
+  line-height: 2;
+  white-space: pre-line;
+}
+.riddle-text.mono {
+  color: var(--accent);
+  letter-spacing: 3px;
+  font-size: 15px;
+}
+
+/* ---- hint ---- */
+.hint {
+  width: 100%;
+  background: #123a2a;
+  border: 3px solid var(--green);
+  padding: 12px;
+}
+.hint.hidden {
+  display: none;
+}
+.hint-text {
+  font-size: 9px;
+  line-height: 1.9;
+  color: #d7ffd9;
+  white-space: pre-line;
+}
+
+/* ---- scan CTA ---- */
+.scan-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+.scan-text {
+  font-size: 9px;
+  color: var(--dim);
+  line-height: 1.8;
+  max-width: 300px;
+}
+
+/* ---- buttons ---- */
+.btn {
+  font-family: inherit;
+  font-size: 11px;
+  color: #20143a;
+  background: var(--accent);
+  border: none;
+  padding: 12px 16px;
+  cursor: pointer;
+  box-shadow: 5px 5px 0 var(--shadow);
+  transition: transform 0.03s, box-shadow 0.03s;
+  line-height: 1.4;
+}
+.btn:active {
+  transform: translate(5px, 5px);
+  box-shadow: 0 0 0 var(--shadow);
+}
+.btn-big {
+  font-size: 14px;
+  padding: 16px 22px;
+}
+.btn-sm {
+  font-size: 9px;
+  padding: 8px 10px;
+  box-shadow: 3px 3px 0 var(--shadow);
+}
+.btn-sm:active {
+  transform: translate(3px, 3px);
+}
+.btn-ghost {
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 5px 5px 0 var(--shadow);
+}
+.link {
+  font-family: inherit;
+  font-size: 8px;
+  color: var(--accent2);
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  line-height: 1.8;
+}
+
+/* ---- success ---- */
+.big-ok {
+  font-size: 30px;
+  color: var(--green);
+  text-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+}
+.ok-sub {
+  font-size: 10px;
+  color: var(--dim);
+}
+
+/* ---- victory ---- */
+.view-victory {
+  position: relative;
+  padding-top: 8px;
+}
+.win-title {
+  font-size: 16px;
+  color: var(--accent2);
+}
+.win-name {
+  font-size: clamp(24px, 9vw, 40px);
+  color: var(--accent);
+  text-shadow: 3px 3px 0 var(--red), 6px 6px 0 rgba(0, 0, 0, 0.5);
+}
+.win-msg {
+  font-size: 11px;
+  line-height: 2.1;
+  color: var(--ink);
+  white-space: pre-line;
+}
+.win-hearts {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+/* confetti */
+.confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+.conf {
+  position: absolute;
+  top: -24px;
+  width: 8px;
+  height: 8px;
+  animation: fall 2.6s linear infinite;
+}
+@keyframes fall {
+  0% {
+    transform: translateY(-24px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(115vh) rotate(540deg);
+    opacity: 0.9;
+  }
+}
+
+/* ---- overlays ---- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(4, 3, 15, 0.82);
+  animation: fadein 0.15s ease-out;
+}
+.overlay-box {
+  width: 100%;
+  max-width: 360px;
+  background: var(--panel);
+  border: 4px solid var(--ink);
+  box-shadow: 0 0 0 4px var(--bg0), 8px 8px 0 rgba(0, 0, 0, 0.6);
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+  text-align: center;
+}
+.overlay-error .overlay-box {
+  border-color: var(--red);
+  box-shadow: 0 0 0 4px var(--bg0), 8px 8px 0 rgba(0, 0, 0, 0.6);
+  animation: shake 0.4s;
+}
+.overlay-title {
+  font-size: 13px;
+}
+.overlay-error .overlay-title {
+  color: var(--red);
+}
+.overlay-msg {
+  font-size: 9px;
+  line-height: 1.9;
+  color: var(--dim);
+}
+.code-input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 13px;
+  text-align: center;
+  padding: 12px;
+  background: var(--bg0);
+  color: var(--accent);
+  border: 3px solid var(--panel2);
+  text-transform: uppercase;
+}
+.row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* organizer */
+.org {
+  max-width: 380px;
+}
+.org-jumps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.org-tokens {
+  width: 100%;
+  font-size: 8px;
+  color: var(--dim);
+  text-align: left;
+}
+.org-tokens summary {
+  cursor: pointer;
+  color: var(--accent2);
+  margin-bottom: 8px;
+}
+.tok {
+  line-height: 1.9;
+  word-break: break-all;
+}
+
+/* ---- animacje ---- */
+@keyframes blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+.blink {
+  animation: blink 1.1s steps(2, start) infinite;
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+.float {
+  animation: float 2.2s ease-in-out infinite;
+}
+@keyframes pop {
+  0% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.pop {
+  animation: pop 0.45s ease-out;
+}
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(8px);
+  }
+  60% {
+    transform: translateX(-5px);
+  }
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+/* ---- ekran blokady ---- */
+.view-blocked {
+  margin-top: 12vh;
+}
+.blocked-title {
+  font-size: 30px;
+  color: var(--red);
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+}
+.blocked-msg {
+  font-size: 10px;
+  color: var(--dim);
+  line-height: 2;
+  max-width: 300px;
+}
+
+/* ---- skaner ---- */
+.scanner {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 20px;
+}
+.scanner-stage {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border: 4px solid var(--ink);
+  box-shadow: 0 0 0 4px var(--bg0);
+  background: #111;
+}
+.scanner-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.scanner-frame {
+  position: absolute;
+  inset: 12%;
+  border: 3px solid var(--accent);
+  box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+.scanner-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--red);
+  box-shadow: 0 0 8px var(--red);
+  animation: scanmove 1.8s ease-in-out infinite;
+}
+@keyframes scanmove {
+  0% {
+    top: 4%;
+  }
+  50% {
+    top: 92%;
+  }
+  100% {
+    top: 4%;
+  }
+}
+.scanner-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+.scanner-hint {
+  font-size: 10px;
+  color: var(--ink);
+  line-height: 1.7;
+}
+.scanner-err {
+  font-size: 10px;
+  color: var(--accent);
+  line-height: 1.8;
+  max-width: 320px;
+}
+
+/* ---- nawigacja między zagadkami ---- */
+.nav-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 28px;
+}
+.solved-badge {
+  font-size: 9px;
+  color: var(--green);
+  border: 2px solid var(--green);
+  padding: 6px 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+  }
+}
+
+/* ===== GABI — ekran zadania (dłuższe treści) ===== */
+.view-riddle .dialog {
+  text-align: left;
+}
+.view-riddle .riddle-text {
+  font-size: 11px;
+  line-height: 1.95;
+}
+
+/* pola odpowiedzi */
+.answer-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.answer-textarea {
+  text-align: left;
+  text-transform: none;
+  line-height: 1.8;
+  resize: vertical;
+  min-height: 120px;
+}
+.house-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.house-lbl {
+  flex: 0 0 64px;
+  font-size: 9px;
+  color: var(--accent2);
+  text-align: left;
+}
+.house-input {
+  flex: 1;
+  text-align: left;
+  text-transform: none;
+  font-size: 11px;
+}
+
+/* ===== GABI — ekran mapy ===== */
+.map-img {
+  width: 100%;
+  max-width: 440px;
+  border: 4px solid var(--ink);
+  box-shadow: 0 0 0 4px var(--bg0), 8px 8px 0 rgba(0, 0, 0, 0.5);
+  image-rendering: auto;
+  display: block;
+}
+.map-hint {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #3a1f2a;
+  border: 3px solid var(--pink);
+  padding: 12px 14px;
+}
+.map-hint-ico {
+  flex: 0 0 auto;
+}
+.map-hint-text {
+  font-size: 10px;
+  line-height: 1.9;
+  color: #ffe0ec;
+  white-space: pre-line;
+  text-align: left;
+}
+
+/* guzik „Otwórz w Google Maps" na ekranie mapy (element <a> stylizowany jak .btn) */
+.map-link {
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+  color: #20143a;
+  background: var(--accent2);
+}
+.map-link:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--shadow);
+}
+
+/* Placeholdery mniejszą czcionką (font PressStart jest szeroki — długie
+   podpowiedzi w polach się nie mieściły). */
+.code-input::placeholder {
+  font-size: 8px;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.75;
+}
+.code-input::-webkit-input-placeholder {
+  font-size: 8px;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.75;
+}

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Urodziny Gabi</title>
+    <meta name="theme-color" content="#0b0b1a" />
+    <meta name="description" content="Urodzinowa gra terenowa Gabi — zagadki, mapy i kody QR." />
+    <!-- Świadomie BEZ *-web-app-capable: dzięki temu gra działa jak karta Safari
+         i współdzieli zapis postępu (localStorage) ze skanami z natywnego aparatu. -->
+    <meta name="apple-mobile-web-app-title" content="Urodziny Gabi" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%230b0b1a'/%3E%3Crect x='2' y='6' width='12' height='8' fill='%23ff6fae'/%3E%3Crect x='7' y='2' width='2' height='12' fill='%23ffd23f'/%3E%3Crect x='2' y='9' width='12' height='2' fill='%23ffd23f'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="scanlines"></div>
+      <main id="screen"></main>
+    </div>
+
+    <noscript>
+      <p style="color: #fff; padding: 20px; font-family: monospace">
+        Ta gra wymaga włączonego JavaScriptu.
+      </p>
+    </noscript>
+
+    <script src="js/config.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/sprites.js"></script>
+    <script src="lib/jsQR.min.js"></script>
+    <script src="js/scanner.js"></script>
+    <script src="js/game.js"></script>
+  </body>
+</html>
