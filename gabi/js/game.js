@@ -48,7 +48,7 @@
   /* ---------- statystyki (per gra; zerowane przy RESECIE) ---------- */
   var STATS_KEY = CFG.statsKey || "gabi_stats_v1";
   function defaultStats() {
-    return { wrong: 0, hints: 0, maps: 0, scans: 0, startTime: null, endTime: null, wrongByStage: {}, answers: {} };
+    return { wrong: 0, hints: 0, maps: 0, scans: 0, startTime: null, endTime: null, wrongByStage: {}, answers: {}, rawAnswers: {} };
   }
   function loadStats() {
     try {
@@ -58,6 +58,7 @@
         for (var k in d) if (s[k] == null) s[k] = d[k];
         if (typeof s.wrongByStage !== "object" || !s.wrongByStage) s.wrongByStage = {};
         if (typeof s.answers !== "object" || !s.answers) s.answers = {};
+        if (typeof s.rawAnswers !== "object" || !s.rawAnswers) s.rawAnswers = {};
         return s;
       }
     } catch (_) {}
@@ -110,7 +111,14 @@
   function saveAnswer(stage, fields) {
     var s = loadStats();
     s.answers[stage.id] = answerToString(stage, fields);
+    // surowe wartości pól — do przywrócenia w inpucie po powrocie do zadania
+    var copy = {};
+    for (var k in fields) copy[k] = fields[k];
+    s.rawAnswers[stage.id] = copy;
     saveStats(s);
+  }
+  function savedFields(stageId) {
+    return (loadStats().rawAnswers || {})[stageId] || {};
   }
 
   /* ---------- "frontowe drzwi" ---------- */
@@ -389,7 +397,8 @@
       kids.push(hintBtn, hintBox);
     }
 
-    // pola odpowiedzi
+    // pola odpowiedzi (z przywróceniem ostatniej odpowiedzi po powrocie do zadania)
+    var saved = savedFields(stage.id);
     var inputs = {};
     var form = h("div", { class: "answer-form" });
     if (stage.check && stage.check.type === "houses") {
@@ -403,6 +412,7 @@
           autocorrect: "off",
           spellcheck: "false",
         });
+        inp.value = saved["house" + idx] || "";
         inputs["house" + idx] = inp;
         form.appendChild(h("label", { class: "house-row" }, h("span", { class: "house-lbl", text: house.label }), inp));
       });
@@ -415,6 +425,7 @@
         autocomplete: "off",
         spellcheck: "false",
       });
+      ta.value = saved.main || "";
       inputs.main = ta;
       form.appendChild(ta);
     } else {
@@ -428,6 +439,7 @@
         autocorrect: "off",
         spellcheck: "false",
       });
+      inp.value = saved.main || "";
       inputs.main = inp;
       form.appendChild(inp);
     }
