@@ -114,11 +114,13 @@ Treści i tokeny: [`ania/js/config.js`](ania/js/config.js).
 
 Gra urodzinowa (13. urodziny Gabi). Mechanika jest **odwrotna niż u Ani**:
 
-1. **Skan kodu** (START na początek, potem koperty w terenie) → pojawia się **ZADANIE**.
-2. Gracze rozwiązują zadanie i **wpisują odpowiedź w aplikacji**.
-3. Po poprawnej odpowiedzi: **zdjęcie mapy z pinezką** (wbudowane, nie link)
+1. **Skan kodu START** → pojawia się **mapa do pierwszej lokalizacji** (plac zabaw
+   NIVEA / zjeżdżalnia) z rymowanką.
+2. Na miejscu znajdują kopertę i ją skanują → pojawia się **ZADANIE**.
+3. Gracze rozwiązują zadanie i **wpisują odpowiedź w aplikacji**.
+4. Po poprawnej odpowiedzi: **zdjęcie mapy z pinezką** (wbudowane, nie link)
    + **podpowiedź** (rymowanka) + guzik **ZESKANUJ KOD**.
-4. Idą pod pinezkę, znajdują kopertę, skanują → kolejne zadanie… aż do **nagrody**
+5. Idą pod pinezkę, znajdują kopertę, skanują → kolejne zadanie… aż do **nagrody**
    (Król Chrobry, duże drzewo) → ekran urodzinowy.
 
 ### Wejście „frontowymi drzwiami"
@@ -137,15 +139,16 @@ lub ręczne wpisanie — i tylko we właściwej kolejności.
 
 | Kod | Gdzie nakleić | Odsłania |
 |-----|---------------|----------|
-| **START** | dajesz Gabi na początek | Zadanie 1 |
-| 1 | Siłownia zewnętrzna (przy biegaczu) | Zadanie 2 |
-| 2 | Pod Baśniowym Zamkiem (przedszkole) | Zadanie 3 |
-| 3 | LO XV (przy donicach) | Zadanie 4 |
-| 4 | Plac rowerowy (Poradnik Młodego Rowerzysty) | Zadanie 5 |
-| 5 | Tyrolka (zjazd na linie) | Zadanie 6 |
-| 6 | Wiadukt PST | Zadanie 7 |
-| 7 | Spektakularny plac zabaw (duży pająk) | Zadanie 8 |
-| 8 | 🏆 Przy nagrodzie (Pomnik B. Chrobrego, duże drzewo) | Ekran urodzinowy |
+| **START** | dajesz Gabi na początek | mapa do placu zabaw |
+| 1 | Plac zabaw NIVEA (zjeżdżalnia) | Zadanie 1 |
+| 2 | Siłownia zewnętrzna (przy biegaczu) | Zadanie 2 |
+| 3 | Pod Baśniowym Zamkiem (przedszkole) | Zadanie 3 |
+| 4 | LO XV (przy donicach) | Zadanie 4 |
+| 5 | Plac rowerowy (Poradnik Młodego Rowerzysty) | Zadanie 5 |
+| 6 | Tyrolka (zjazd na linie) | Zadanie 6 |
+| 7 | Wiadukt PST | Zadanie 7 |
+| 8 | Spektakularny plac zabaw (duży pająk) | Zadanie 8 |
+| 9 | 🏆 Przy nagrodzie (Pomnik B. Chrobrego, duże drzewo) | Ekran urodzinowy |
 
 > Mapy to gotowe zdjęcia z pinezką w [`gabi/assets/maps/`](gabi/assets/maps/)
 > (wygenerowane z OpenStreetMap). Zcache'owane w [`gabi/sw.js`](gabi/sw.js),

@@ -234,7 +234,7 @@
           card.appendChild(place);
           var unlock = document.createElement("div");
           unlock.className = "unlock";
-          unlock.textContent = "otwiera grę (odsłania ZADANIE 1)";
+          unlock.textContent = "otwiera grę (pokazuje mapę do placu zabaw)";
           card.appendChild(unlock);
           makeQR(card, startUrl);
           var token = document.createElement("div");
@@ -245,6 +245,36 @@
           cards.appendChild(card);
         })();
 
+        var TOTAL = N + (CFG.intro ? 1 : 0);
+
+        // Koperta na placu zabaw — odsłania ZADANIE 1
+        if (CFG.intro) {
+          var introUrl = base + "#s=" + encodeURIComponent(CFG.intro.scanToken);
+          var ic = document.createElement("div");
+          ic.className = "card";
+          var ino = document.createElement("div");
+          ino.className = "code-no";
+          ino.textContent = "KOD 1 z " + TOTAL;
+          ic.appendChild(ino);
+          var iplace = document.createElement("div");
+          iplace.className = "place";
+          iplace.textContent = "Naklej w: " + CFG.intro.scanPlace;
+          ic.appendChild(iplace);
+          var iunlock = document.createElement("div");
+          iunlock.className = "unlock";
+          iunlock.textContent = "odsłania: ZADANIE 1";
+          ic.appendChild(iunlock);
+          makeQR(ic, introUrl);
+          var itoken = document.createElement("div");
+          itoken.className = "token";
+          itoken.textContent = CFG.intro.scanToken;
+          var ismall = document.createElement("small");
+          ismall.textContent = "kod awaryjny (do ręcznego wpisania)";
+          itoken.appendChild(ismall);
+          ic.appendChild(itoken);
+          cards.appendChild(ic);
+        }
+
         STAGES.forEach(function (s, i) {
           var url = base + "#s=" + encodeURIComponent(s.scanToken);
           var card = document.createElement("div");
@@ -252,7 +282,7 @@
 
           var no = document.createElement("div");
           no.className = "code-no";
-          no.textContent = "KOD " + (i + 1) + " z " + N;
+          no.textContent = "KOD " + (i + 2) + " z " + TOTAL;
           card.appendChild(no);
 
           var place = document.createElement("div");

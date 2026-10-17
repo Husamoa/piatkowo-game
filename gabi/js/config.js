@@ -41,6 +41,18 @@ window.GAME_CONFIG = {
   storageKey: "gabi_progress_v1",
   enteredKey: "gabi_entered_v1",
 
+  // Ekran startowy: po zeskanowaniu kodu START pojawia się mapa do PIERWSZEJ
+  // lokalizacji (plac zabaw NIVEA / zjeżdżalnia). Tam dziewczynki znajdują
+  // kopertę, skanują ją (scanToken poniżej) i dopiero wtedy odsłania się
+  // ZADANIE 1.
+  intro: {
+    mapImage: "assets/maps/map-zjezdzalnia.png",
+    mapLink: "https://maps.app.goo.gl/3j29yUFLuh8VSTzJ8",
+    mapHint: "Tam, gdzie na pupie w dół się śmiga,\nkolejna koperta właśnie tam się skrywa!",
+    scanPlace: "Plac zabaw NIVEA (zjeżdżalnia)",
+    scanToken: "GB-A1N7",
+  },
+
   stages: [
     {
       id: 1,

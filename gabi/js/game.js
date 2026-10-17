@@ -22,12 +22,12 @@
   /* ---------- postęp ---------- */
   function loadState() {
     var raw = localStorage.getItem(CFG.storageKey);
-    var st = { stage: 0, phase: "solve" };
+    var st = { stage: 0, phase: "intro" };
     if (raw) {
       try {
         var p = JSON.parse(raw);
         if (p && typeof p.stage === "number") st.stage = p.stage;
-        if (p && (p.phase === "solve" || p.phase === "map" || p.phase === "done"))
+        if (p && (p.phase === "intro" || p.phase === "solve" || p.phase === "map" || p.phase === "done"))
           st.phase = p.phase;
       } catch (_) {}
     }
@@ -509,6 +509,81 @@
     );
   }
 
+  /* ---------- EKRAN STARTOWY: mapa do pierwszej lokalizacji ---------- */
+  function renderIntro() {
+    clearScreen();
+    markStart(); // start liczenia czasu gry
+    var intro = CFG.intro || {};
+    var kids = [topBar(), progressDots(0)];
+
+    kids.push(
+      h("div", { class: "stage-label", text: "START · GDZIE IDZIEMY?" }),
+      h("img", {
+        class: "map-img",
+        src: intro.mapImage,
+        alt: "Mapa z pinezką — " + (intro.scanPlace || ""),
+      })
+    );
+
+    if (intro.mapLink) {
+      kids.push(
+        h("a", {
+          class: "btn btn-sm map-link",
+          href: intro.mapLink,
+          target: "_blank",
+          rel: "noopener noreferrer",
+          text: "📍 OTWÓRZ W GOOGLE MAPS",
+          onclick: function () {
+            Audio8.unlock();
+            Audio8.blip();
+            bumpStat("maps");
+          },
+        })
+      );
+    }
+
+    kids.push(
+      h(
+        "div",
+        { class: "map-hint" },
+        h("div", { class: "map-hint-ico" }, Sprites.el("pin", 4)),
+        h("p", { class: "map-hint-text", text: intro.mapHint })
+      ),
+      h(
+        "div",
+        { class: "scan-cta" },
+        Sprites.el("letter", 5),
+        h("p", { class: "scan-text", text: "Znajdźcie tam kopertę i zeskanujcie kod, by odsłonić pierwsze zadanie." })
+      ),
+      h("button", {
+        class: "btn btn-big",
+        text: "ZESKANUJ KOD",
+        onclick: function () {
+          Audio8.unlock();
+          Audio8.blip();
+          QRScanner.open(
+            function (text) {
+              processScan(tokenFromScanned(text));
+            },
+            function () {
+              manualEntry();
+            }
+          );
+        },
+      }),
+      h("button", {
+        class: "link",
+        text: "Aparat nie działa? Wpisz kod ręcznie",
+        onclick: function () {
+          Audio8.unlock();
+          manualEntry();
+        },
+      })
+    );
+
+    screen.appendChild(h("div", { class: "view view-map" }, kids));
+  }
+
   /* ---------- EKRAN MAPY + SKANER ---------- */
   function renderMap(st) {
     clearScreen();
@@ -838,6 +913,17 @@
   function organizer() {
     var st = loadState();
     var jumps = h("div", { class: "org-jumps" });
+    jumps.appendChild(
+      h("button", {
+        class: "btn btn-sm btn-ghost",
+        text: "Start: mapa",
+        onclick: function () {
+          saveState({ stage: 0, phase: "intro" });
+          ov.remove();
+          renderCurrent();
+        },
+      })
+    );
     for (var i = 0; i < N; i++) {
       (function (k) {
         jumps.appendChild(
@@ -878,6 +964,8 @@
 
     var tokens = h("details", { class: "org-tokens" }, h("summary", { text: "Pokaż kody (tokeny)" }));
     tokens.appendChild(h("div", { class: "tok", text: "START → " + CFG.startToken }));
+    if (CFG.intro)
+      tokens.appendChild(h("div", { class: "tok", text: "0. skan w: " + CFG.intro.scanPlace + " → " + CFG.intro.scanToken }));
     STAGES.forEach(function (s) {
       tokens.appendChild(
         h("div", { class: "tok", text: s.id + ". skan w: " + s.scanPlace + " → " + s.scanToken })
@@ -912,7 +1000,7 @@
           class: "btn btn-ghost",
           text: "RESET GRY",
           onclick: function () {
-            saveState({ stage: 0, phase: "solve" });
+            saveState({ stage: 0, phase: "intro" });
             resetStats();
             ov.remove();
             renderTitle();
@@ -937,6 +1025,21 @@
     var st = loadState();
     if (isDone(st)) {
       overlay("info", "GRA SKOŃCZONA", "Prezent już znaleziony!");
+      return;
+    }
+
+    // Ekran startowy: koperta na placu zabaw odsłania ZADANIE 1.
+    if (st.phase === "intro") {
+      var introTok = (CFG.intro || {}).scanToken;
+      if (token === introTok) {
+        bumpStat("scans");
+        saveState({ stage: 0, phase: "solve" });
+        Audio8.success();
+        renderSolve(loadState());
+      } else {
+        Audio8.error();
+        overlay("error", "NIEPRAWIDŁOWY KOD QR!", "Zeskanujcie kod z koperty na placu zabaw.");
+      }
       return;
     }
 
@@ -986,6 +1089,8 @@
     var st = loadState();
     if (isDone(st)) {
       renderVictory();
+    } else if (st.phase === "intro") {
+      renderIntro();
     } else if (st.phase === "map") {
       renderMap(st);
     } else {
@@ -1031,7 +1136,7 @@
       if (startToken === CFG.startToken) {
         markEntered();
         var st = loadState();
-        if (st.stage === 0 && st.phase === "solve") renderTitle();
+        if (st.stage === 0 && st.phase === "intro") renderTitle();
         else renderCurrent();
       } else {
         renderBlocked();
@@ -1070,7 +1175,7 @@
       if (!hasEntered()) renderBlocked();
       else {
         var st = loadState();
-        if (st.stage === 0 && st.phase === "solve") renderTitle();
+        if (st.stage === 0 && st.phase === "intro") renderTitle();
         else renderCurrent();
       }
     }

@@ -10,7 +10,7 @@
  * inaczej telefon będzie serwował starą wersję z cache.
  */
 var CACHE_PREFIX = "gabi-";
-var CACHE = CACHE_PREFIX + "v13";
+var CACHE = CACHE_PREFIX + "v14";
 var ASSETS = [
   "./",
   "./index.html",
@@ -26,6 +26,7 @@ var ASSETS = [
   "./tools/print-codes.html",
   "./lib/qrcode.min.js",
   "./lib/jsQR.min.js",
+  "./assets/maps/map-zjezdzalnia.png",
   "./assets/maps/map-silownia.png",
   "./assets/maps/map-basniowy-zamek.png",
   "./assets/maps/map-lo15.png",
