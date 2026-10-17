@@ -10,7 +10,7 @@
  * inaczej telefon będzie serwował starą wersję z cache.
  */
 var CACHE_PREFIX = "gabi-";
-var CACHE = CACHE_PREFIX + "v16";
+var CACHE = CACHE_PREFIX + "v17";
 var ASSETS = [
   "./",
   "./index.html",

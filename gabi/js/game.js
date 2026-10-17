@@ -827,7 +827,7 @@
       ["✉️ Zeskanowane koperty", String(s.scans || 0)],
       ["❌ Błędne odpowiedzi", String(s.wrong || 0)],
       ["💡 Użyte podpowiedzi", String(s.hints || 0)],
-      ["📍 Otwarcia Google Maps", String(s.maps || 0)],
+      ["📍 Otwarcia mapy", String(s.maps || 0)],
     ];
 
     var list = h("div", { class: "stats-list" });
