@@ -27,7 +27,7 @@
 }
 
 /* iOS ignoruje user-scalable=no — to wyłącza zoom z podwójnego tapnięcia
-   na klikalnych elementach (np. 5x tap w tytuł = panel organizatora),
+   na klikalnych elementach (np. 10x tap w tytuł = panel organizatora),
    zostawiając pinch-zoom. */
 button,
 .btn,

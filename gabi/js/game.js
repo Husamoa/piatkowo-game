@@ -181,7 +181,7 @@
     b.textContent = Audio8.isMuted() ? "♪ OFF" : "♪ ON";
   }
 
-  /* ---------- panel organizatora (5x tap w tytuł) ---------- */
+  /* ---------- panel organizatora (10x tap w tytuł) ---------- */
   var tapCount = 0,
     tapTimer = null;
   function onTitleTap() {
@@ -190,7 +190,7 @@
     tapTimer = setTimeout(function () {
       tapCount = 0;
     }, 1200);
-    if (tapCount >= 5) {
+    if (tapCount >= 10) {
       tapCount = 0;
       organizer();
     }
@@ -617,7 +617,7 @@
         h("h1", { class: "win-name", text: CFG.hero + "!" }),
         h("p", {
           class: "win-msg",
-          text: "NIESPODZIANKA! 🎉\nIdźcie teraz do FUSÓW\nna lody — są już opłacone!\nSto lat w dniu 13. urodzin!",
+          text: "NIESPODZIANKA! 🎉\nPo rozszyfrowaniu zakodowanych wiadomości\nbędziecie wiedziały, gdzie się dalej udać.\nSto lat w dniu 13. urodzin!",
         }),
         h(
           "div",

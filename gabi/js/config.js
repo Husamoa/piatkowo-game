@@ -138,7 +138,7 @@ window.GAME_CONFIG = {
       saveAnswerAs: "poem", // zapisz treść wierszyka, by pokazać ją na końcu gry
       inputPlaceholder: "wpiszcie tu swój wierszyk...",
       mapImage: "assets/maps/map-plac-rowerowy.png",
-      mapLink: "https://maps.app.goo.gl/VxBkwQgEBFMMtFAF6",
+      mapLink: "https://maps.app.goo.gl/nKsKzYoiyJXMy4g46",
       mapHint:
         "Teraz plan jest oczywisty:\nszukajcie koperty w okolicy Poradnika Młodego Rowerzysty!",
       scanPlace: "Plac rowerowy (os. B. Chrobrego) — przy Poradniku Młodego Rowerzysty",
