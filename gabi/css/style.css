@@ -784,3 +784,9 @@ body {
   max-height: 90dvh;
   overflow-y: auto;
 }
+
+/* zapasowy guzik Apple Maps (tylko iOS) — inny kolor niż Google */
+.map-link.apple-link {
+  background: var(--ink);
+  color: #20143a;
+}

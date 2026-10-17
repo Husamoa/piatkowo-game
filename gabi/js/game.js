@@ -162,6 +162,36 @@
     return document.getElementById("app");
   }
 
+  /* ---------- iOS: zapasowy guzik Apple Maps ---------- */
+  function isIOS() {
+    var ua = navigator.userAgent || "";
+    return (
+      /iPad|iPhone|iPod/.test(ua) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+    );
+  }
+  // Na iOS dodatkowy guzik „Apple Maps" (gdyby link Google nie zadziałał).
+  function appleMapsBtn(coords, label) {
+    if (!coords || !isIOS()) return null;
+    var url =
+      "https://maps.apple.com/?ll=" +
+      encodeURIComponent(coords) +
+      "&q=" +
+      encodeURIComponent(label || "Cel");
+    return h("a", {
+      class: "btn btn-sm map-link apple-link",
+      href: url,
+      target: "_blank",
+      rel: "noopener noreferrer",
+      text: "🧭 OTWÓRZ W APPLE MAPS",
+      onclick: function () {
+        Audio8.unlock();
+        Audio8.blip();
+        bumpStat("maps");
+      },
+    });
+  }
+
   /* ---------- dźwięk ---------- */
   function muteBtn() {
     var b = h("button", {
@@ -541,6 +571,8 @@
         })
       );
     }
+    var introApple = appleMapsBtn(intro.coords, intro.scanPlace);
+    if (introApple) kids.push(introApple);
 
     kids.push(
       h(
@@ -616,6 +648,8 @@
         })
       );
     }
+    var stageApple = appleMapsBtn(stage.coords, stage.scanPlace);
+    if (stageApple) kids.push(stageApple);
 
     // podpowiedź (rymowanka prowadząca do koperty)
     kids.push(

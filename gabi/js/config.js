@@ -48,6 +48,7 @@ window.GAME_CONFIG = {
   intro: {
     mapImage: "assets/maps/map-zjezdzalnia.png",
     mapLink: "https://maps.app.goo.gl/3j29yUFLuh8VSTzJ8",
+    coords: "52.4576235,16.9116169",
     mapHint: "Tam, gdzie na pupie w dół się śmiga,\nkolejna koperta właśnie tam się skrywa!",
     scanPlace: "Plac zabaw NIVEA (zjeżdżalnia)",
     scanToken: "GB-A1N7",
@@ -84,6 +85,7 @@ window.GAME_CONFIG = {
       inputPlaceholder: "wpiszcie imiona po przecinku, po kolei",
       mapImage: "assets/maps/map-silownia.png",
       mapLink: "https://maps.app.goo.gl/spXB7iTEME5631f1A",
+      coords: "52.4555112,16.9113648",
       mapHint:
         "Gdy już na miejscu biegacza odnajdziecie,\ngdzieś obok kopertę znajdziecie!",
       scanPlace: "Siłownia zewnętrzna w parku (przy biegaczu)",
@@ -106,6 +108,7 @@ window.GAME_CONFIG = {
       inputPlaceholder: "wpiszcie kod",
       mapImage: "assets/maps/map-basniowy-zamek.png",
       mapLink: "https://maps.app.goo.gl/4PngX43xJh8dBxWN9",
+      coords: "52.454327,16.912653",
       mapHint:
         "Kolejne zadanie znajdziecie tam, gdzie mali książęta i księżniczki\nparkują pod przedszkolem swoje rowery i bryczki.",
       scanPlace: "Pod Baśniowym Zamkiem (przedszkole, stojak na rowery)",
@@ -125,6 +128,7 @@ window.GAME_CONFIG = {
       inputPlaceholder: "wpiszcie, kto jest na portrecie",
       mapImage: "assets/maps/map-lo15.png",
       mapLink: "https://maps.app.goo.gl/enu31goCEdpPn8cA7",
+      coords: "52.4542567,16.913805",
       mapHint:
         "Przy wejściu do szkoły donice czekają,\na gdzieś w ich pobliżu instrukcję chowają!",
       scanPlace: "LO XV — przy wejściu do szkoły, przy donicach",
@@ -151,6 +155,7 @@ window.GAME_CONFIG = {
       inputPlaceholder: "wpiszcie tu swój wierszyk...",
       mapImage: "assets/maps/map-plac-rowerowy.png",
       mapLink: "https://maps.app.goo.gl/nKsKzYoiyJXMy4g46",
+      coords: "52.4556782,16.9139034",
       mapHint:
         "Teraz plan jest oczywisty:\nszukajcie koperty w okolicy Poradnika Młodego Rowerzysty!",
       scanPlace: "Plac rowerowy (os. B. Chrobrego) — przy Poradniku Młodego Rowerzysty",
@@ -181,6 +186,7 @@ window.GAME_CONFIG = {
       },
       mapImage: "assets/maps/map-tyrolka.png",
       mapLink: "https://maps.app.goo.gl/C5ZrTF5CAiMkD5dD7",
+      coords: "52.455860,16.915235",
       mapHint:
         "Teraz do miejsca zjazdów na linie zmierzajcie\ni tam kolejnej koperty szukajcie!",
       scanPlace: "Tyrolka (zjazd na linie)",
@@ -208,6 +214,7 @@ window.GAME_CONFIG = {
       inputPlaceholder: "wpiszcie wynik",
       mapImage: "assets/maps/map-wiadukt-pst.png",
       mapLink: "https://maps.app.goo.gl/vqAhpgyviHMyRUTt6",
+      coords: "52.455556,16.917889",
       mapHint:
         "Kolejna koperta czeka na Was tam,\ngdzie kilka tramwajów może jechać na raz.",
       scanPlace: "Wiadukt PST (nad torami tramwajowymi)",
@@ -227,6 +234,7 @@ window.GAME_CONFIG = {
       inputPlaceholder: "wpiszcie sumę rogów",
       mapImage: "assets/maps/map-pajak.png",
       mapLink: "https://maps.app.goo.gl/nTuF1mHcnRW9HT9a9",
+      coords: "52.4555045,16.9151255",
       mapHint:
         "Gdy już Plac Spektakularny odnajdziecie, chwilę odpocząć pewnie zechcecie.\n" +
         "Lecz zanim na ławce wygodnie siądziecie, sprawdźcie je wszystkie, a kopertę znajdziecie!",
@@ -250,6 +258,7 @@ window.GAME_CONFIG = {
       inputPlaceholder: "wpiszcie kod",
       mapImage: "assets/maps/map-krol-chrobry.png",
       mapLink: "https://maps.app.goo.gl/4kBqp7zc8UJsdy9w8",
+      coords: "52.452956,16.9151486",
       mapHint:
         "Do Króla Chrobrego swe kroki skierujcie, dziarsko przez osiedle maszerujcie.\n" +
         "Znajdźcie tam duże drzewo, rozejrzyjcie się śmiało,\nbo coś się przy nim sprytnie schowało!",
